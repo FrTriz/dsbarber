@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = target.closest('.barber-card');
 
             if (target.closest('.edit-btn')) {
-                openModal(true, card);
+                openBarberModal(true, card);
             }
 
             if (target.closest('.delete-btn')) {
@@ -163,10 +163,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateCard = (card, barber) => {
         card.innerHTML = `
             <div class="barber-card-header">
-                <img src="${barber.photo}" alt="Avatar de ${barber.name}">
-                <div class="barber-info">
-                    <h3>${barber.name}</h3>
-                    <div class="status-badge ${barber.status}">${barber.status === 'active' ? 'Ativo' : 'Inativo'}</div>
+                <div class="barber-details">
+                    <img src="${barber.photo}" alt="Avatar de ${barber.name}">
+                    <div class="barber-info">
+                        <h3>${barber.name}</h3>
+                        <div class="status-badge ${barber.status}">${barber.status === 'active' ? 'Ativo' : 'Inativo'}</div>
+                    </div>
+                </div>
+                <div class="barber-card-actions">
+                    <button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>
+                    <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </div>
             <div class="barber-card-body">
@@ -174,10 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="specialties-tags">
                     ${createSpecialtyTags(barber.specialties)}
                 </div>
-            </div>
-            <div class="barber-card-actions">
-                <button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>
-                <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
             </div>
         `;
     };
