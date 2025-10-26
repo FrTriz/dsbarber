@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ds Barber - Login</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>Ds Barber</h1>
+            <p>Seu corte perfeito está há alguns cliques de distância.</p>
+        </div>
+        <div class="right-panel">
+            <div class="login-form">
+                <h2>Entrar</h2>
+                <p>Bem-vindo de volta! Insira seu E-mail e Senha</p>
+                <form id="login-form">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <input type="email" id="email" placeholder="demo@email.com">
+                    </div>
+                    <div class="error-message" data-error-for="email"></div>
+
+                    <label for="password">Senha</label>
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Digite sua senha">
+                    </div>
+                    <div class="error-message" data-error-for="password"></div>
+
+                    <div class="options">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember">
+                            <label for="remember">Lembre de mim</label>
+                        </div>
+                        <a href="#">Esqueceu a senha?</a>
+                    </div>
+                    <button type="submit" class="login-btn">Login</button>
+                </form>
+                <p class="signup-link">Não tem uma conta? <a href="signup.html">Cadastre-se</a></p>
+            </div>
+        </div>
+    </div>
+    <script src="../js/main.js"></script>
+</body>
+</html>

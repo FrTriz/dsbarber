@@ -1,0 +1,87 @@
+/* services.css */
+
+.add-service-btn {
+    background-color: #2EB67D;
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.services-cards-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.service-card {
+    background-color: #1F2924;
+    border: 1px solid #2a342f;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem;
+}
+
+.service-card-header h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #f0f0f0;
+}
+
+.service-card-header p {
+    margin: 0;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+.service-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #2a342f;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.price {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2EB67D;
+}
+
+.duration {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #aaa;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: auto; /* Pushes buttons to the right */
+}
+
+.card-actions button {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 1rem; /* Matched to barber page */
+    padding: 5px; /* Added for easier clicking */
+    transition: color 0.2s ease;
+}
+
+.card-actions button:hover {
+    color: #2EB67D;
+}
