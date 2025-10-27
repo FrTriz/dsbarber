@@ -17,16 +17,16 @@
             <div class="login-form">
                 <h2>Entrar</h2>
                 <p>Bem-vindo de volta! Insira seu E-mail e Senha</p>
-                <form id="login-form">
+                <form action="../php/Funcoes/processamento-login.php" method="POST">
                     <label for="email">Email</label>
                     <div class="input-group">
-                        <input type="email" id="email" placeholder="demo@email.com">
+                        <input type="email" id="email" name="email" placeholder="demo@email.com">
                     </div>
                     <div class="error-message" data-error-for="email"></div>
 
                     <label for="password">Senha</label>
                     <div class="input-group">
-                        <input type="password" id="password" placeholder="Digite sua senha">
+                        <input type="password" id="password" name="senha" placeholder="Digite sua senha">
                     </div>
                     <div class="error-message" data-error-for="password"></div>
 
@@ -39,7 +39,7 @@
                     </div>
                     <button type="submit" class="login-btn">Login</button>
                 </form>
-                <p class="signup-link">Não tem uma conta? <a href="signup.html">Cadastre-se</a></p>
+                <p class="signup-link">Não tem uma conta? <a href="signup.php">Cadastre-se</a></p>
             </div>
         </div>
     </div>

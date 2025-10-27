@@ -13,7 +13,7 @@
         <nav>
             <a href="/html/index.html" class="logo"><img src="/Ds_Barber_Logo.png" width="130px" height="120px"></a>
             <div class="auth-buttons">
-                <a href="login.html" class="login-btn-nav">Login</a>
+                <a href="login.php" class="login-btn-nav">Login</a>
                 <a href="signup.php" class="signup-btn-nav">Cadastro</a>
             </div>
         </nav>
