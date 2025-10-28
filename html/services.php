@@ -1,3 +1,11 @@
+<?php
+require_once '../php/conexao.php';
+require_once '../php/Classes/ServicosClass.php';
+
+$servicos = new Servicos($pdo);
+$listaServicos = $servicos->listarServicos(); // <-- Ótimo
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -24,7 +32,7 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="admin.html"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
-                    <li><a href="services.html" class="active"><i class="fas fa-concierge-bell"></i> Serviços</a></li>
+                    <li><a href="services.php" class="active"><i class="fas fa-concierge-bell"></i> Serviços</a></li>
                     <li><a href="barbers.html"><i class="fas fa-cut"></i> Barbeiros</a></li>
                     <li><a href="reports.html"><i class="fas fa-chart-line"></i> Relatórios</a></li>
                 </ul>
@@ -58,24 +66,24 @@
                 <h2 id="modal-title">Adicionar Novo Serviço</h2>
                 <button id="close-modal-btn" class="close-modal-btn"><i class="fas fa-times"></i></button>
             </header>
-            <form id="service-form">
-                <input type="hidden" id="service-id">
+            <form action="../php/Funcoes/add-servico.php" id="service-form" method="POST" class="modal-body">
+                <input type="hidden" id="service-id" name="id_servico">
                 <div class="form-group">
                     <label for="service-name">Nome do Serviço</label>
-                    <input type="text" id="service-name" required>
+                    <input type="text" id="service-name" name="nome" required>
                 </div>
                 <div class="form-group">
                     <label for="service-description">Descrição</label>
-                    <textarea id="service-description" rows="3"></textarea>
+                    <textarea id="service-description" name="descricao" rows="3"></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="service-price">Preço (R$)</label>
-                        <input type="number" id="service-price" step="0.01" required>
+                        <input type="number" id="service-price" name="preco" step="0.01" required>
                     </div>
                     <div class="form-group">
                         <label for="service-duration">Duração (min)</label>
-                        <input type="number" id="service-duration" required>
+                        <input type="number" id="service-duration" name="duracao_minutos"  required>
                     </div>
                 </div>
                 <button type="submit" class="btn-submit">Salvar Serviço</button>
@@ -99,7 +107,7 @@
             </footer>
         </div>
     </div>
-    
+    <script>const servicosVindosDoBanco = <?php echo json_encode($listaServicos); ?>;</script>
     <script src="../js/services.js"></script>
 </body>
 </html>

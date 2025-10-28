@@ -37,23 +37,83 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemNameToDelete = document.getElementById('item-name-to-delete');
     let itemIdToDelete = null;
 
-    // --- Modal Functions --- //
+    // --- Data and Helper Functions (CORRIGIDO PARA LER DO BANCO) --- //
+    let initialServices = servicosVindosDoBanco;
+
+    const getServiceById = (id) => {
+        // CORREÇÃO: Compara com 'id_servico' e usa '==' (para comparar string com número)
+        return initialServices.find(s => s.id_servico == id);
+    };
+
+    const createServiceCard = (service) => {
+        const card = document.createElement('div');
+        card.className = 'service-card';
+        // CORREÇÃO: Usa 'id_servico'
+        card.dataset.id = service.id_servico; 
+        updateCard(card, service);
+        return card;
+    };
+
+    const updateCard = (card, service) => {
+        // CORREÇÃO: Todos os nomes de propriedades atualizados para bater com o banco
+        card.innerHTML = `
+            <div class="service-card-header">
+                <h3>${service.nome}</h3>
+                <p>${service.descricao}</p>
+            </div>
+            <div class="service-card-footer">
+                <span class="price">R$${parseFloat(service.preco).toFixed(2)}</span>
+                
+                <span class="duration"><i class="fas fa-clock"></i> ${service.duracao_minutos} min</span>
+                
+                <div class="card-actions">
+                    <button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>
+                    <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </div>
+        `;
+    };
+
+    const renderServices = () => {
+        if(!servicesContainer) return;
+        servicesContainer.innerHTML = '';
+        if (initialServices) { // Garante que initialServices não seja nulo
+            initialServices.forEach(service => {
+                const card = createServiceCard(service);
+                servicesContainer.appendChild(card);
+            });
+        }
+    };
+
+   // --- Modal Functions --- //
     const openServiceModal = (isEdit = false, card = null) => {
-        serviceForm.reset();
+        serviceForm.reset(); // [cite: 16]
+        
         if (isEdit && card) {
-            modalTitle.textContent = 'Editar Serviço';
-            const service = getServiceById(card.dataset.id);
+            // MODO DE EDIÇÃO
+            modalTitle.textContent = 'Editar Serviço'; // [cite: 18]
+            // Define o 'action' do formulário para o script de ATUALIZAR
+            serviceForm.setAttribute('action', '../php/Funcoes/atualizar-servico.php'); // [cite: 18]
+
+            const service = getServiceById(card.dataset.id); // [cite: 19]
             if(service) {
-                serviceIdInput.value = service.id;
-                serviceNameInput.value = service.name;
-                serviceDescriptionInput.value = service.description;
-                servicePriceInput.value = service.price;
-                serviceDurationInput.value = service.duration;
+                // CORREÇÃO: Usar os nomes das colunas do banco
+                serviceIdInput.value = service.id_servico;
+                serviceNameInput.value = service.nome;
+                serviceDescriptionInput.value = service.descricao;
+                servicePriceInput.value = service.preco;
+                serviceDurationInput.value = service.duracao_minutos;
             }
         } else {
-            modalTitle.textContent = 'Adicionar Novo Serviço';
-            serviceIdInput.value = '';
+            // MODO DE ADIÇÃO
+            modalTitle.textContent = 'Adicionar Novo Serviço'; // [cite: 22]
+            // Define o 'action' do formulário para o script de ADICIONAR
+            serviceForm.setAttribute('action', '../php/Funcoes/add-servico.php'); // [cite: 22]
+            serviceIdInput.value = ''; // 
         }
+        
+        // CORREÇÃO: Esta linha foi movida para FORA do 'else'
+        // Agora o modal vai abrir tanto para "Adicionar" quanto para "Editar"
         if(serviceModal) serviceModal.classList.add('show');
     };
 
@@ -87,14 +147,47 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === deleteConfirmModal) closeDeleteModal();
     });
 
-    if(confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', () => {
-        if(itemIdToDelete) {
-            initialServices = initialServices.filter(s => s.id !== itemIdToDelete);
-            const cardToRemove = servicesContainer.querySelector(`[data-id='${itemIdToDelete}']`);
-            if(cardToRemove) cardToRemove.remove();
-            closeDeleteModal();
-        }
-    });
+    // Event Listener do Botão "Confirmar Exclusão" (CORRIGIDO)
+    if(confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', async () => { // <-- 1. Tornar async
+            if(itemIdToDelete) {
+
+                // 2. Preparar os dados para enviar ao PHP
+                const formData = new FormData();
+                formData.append('id_servico', itemIdToDelete); // O PHP espera 'id_servico'
+
+                try {
+                    // 3. Chamar o script PHP (use o caminho correto)
+                    const response = await fetch('../php/Funcoes/excluir-servico.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    // 4. Ler a resposta JSON
+                    const data = await response.json();
+
+                    if (!response.ok || !data.sucesso) {
+                        throw new Error(data.mensagem || "Erro ao excluir no servidor.");
+                    }
+
+                    // 5. SUCESSO! O PHP excluiu. Agora atualizamos o front-end.
+                    
+                    // CORREÇÃO: Usar 'id_servico' para filtrar
+                    initialServices = initialServices.filter(s => s.id_servico != itemIdToDelete);
+                    
+                    const cardToRemove = servicesContainer.querySelector(`[data-id='${itemIdToDelete}']`);
+                    if(cardToRemove) cardToRemove.remove();
+                    
+                    closeDeleteModal();
+
+                } catch (error) {
+                    // 6. Se o fetch ou o PHP derem erro
+                    console.error("Erro ao excluir serviço:", error);
+                    alert("Falha ao excluir o serviço: " + error.message);
+                }
+            }
+        });
+    }
 
     // Event delegation for Edit and Delete
     if(servicesContainer) {
@@ -112,74 +205,73 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Form Submission
-    if(serviceForm) {
-        serviceForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const serviceData = {
-                id: serviceIdInput.value || Date.now().toString(),
-                name: serviceNameInput.value,
-                description: serviceDescriptionInput.value,
-                price: parseFloat(servicePriceInput.value),
-                duration: parseInt(serviceDurationInput.value, 10)
-            };
+    // Form Submission (CORRIGIDO PARA ADICIONAR E ATUALIZAR)
+   if (serviceForm) {
+        serviceForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // 1. Impedir o recarregamento da página 
 
-            if (serviceIdInput.value) {
-                initialServices = initialServices.map(s => s.id === serviceData.id ? serviceData : s);
-                const cardToUpdate = servicesContainer.querySelector(`[data-id='${serviceData.id}']`);
-                if (cardToUpdate) updateCard(cardToUpdate, serviceData);
-            } else {
-                initialServices.push(serviceData);
-                const newCard = createServiceCard(serviceData);
-                servicesContainer.appendChild(newCard);
+            // 2. Pega a URL correta (add ou update) que definimos no openServiceModal
+            const url = serviceForm.getAttribute('action');
+            const formData = new FormData(serviceForm);
+
+            // Pega o ID (se existir) para sabermos o que fazer no front-end
+            const idSendoEditado = serviceIdInput.value;
+
+            try {
+                // 3. Enviar os dados para o PHP
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // 4. LER A RESPOSTA COMO JSON (pois o PHP envia JSON)
+                const data = await response.json(); 
+
+                // 5. Checar se o PHP retornou sucesso
+                if (!response.ok || !data.sucesso) {
+                    throw new Error(data.mensagem || "Erro desconhecido do servidor.");
+                }
+
+                // 6. SUCESSO! O PHP salvou.
+                
+                // Pegamos os dados do formulário para atualizar a tela
+                const serviceData = {
+                    id_servico: idSendoEditado || Date.now().toString(), // Reusa o ID se for edição
+                    nome: serviceNameInput.value,
+                    descricao: serviceDescriptionInput.value,
+                    preco: parseFloat(servicePriceInput.value),
+                    duracao_minutos: parseInt(serviceDurationInput.value, 10)
+                };
+                
+                if (idSendoEditado) { 
+                    // MODO DE EDIÇÃO: Atualiza o card existente
+                    const cardToUpdate = servicesContainer.querySelector(`[data-id='${idSendoEditado}']`); 
+                    if (cardToUpdate) {
+                        updateCard(cardToUpdate, serviceData);
+                    }
+                    
+                    // Atualiza também o array 'initialServices'
+                    const index = initialServices.findIndex(s => s.id_servico == idSendoEditado);
+                    if(index > -1) {
+                        initialServices[index] = serviceData;
+                    }
+                } 
+                else {
+                    // MODO DE ADIÇÃO: Adiciona um novo card
+                    const newCard = createServiceCard(serviceData);
+                    servicesContainer.appendChild(newCard);
+                    initialServices.push(serviceData); // Adiciona no array local
+                }
+
+                closeServiceModal();
+
+            } catch (error) {
+                // 7. Se o 'fetch' ou o PHP derem erro
+                console.error("Erro ao salvar serviço (no catch):", error);
+                alert("Falha ao salvar o serviço: " + error.message);
             }
-            closeServiceModal();
         });
     }
-
-    // --- Data and Helper Functions --- //
-    let initialServices = [
-        { id: '1', name: 'Corte de Cabelo', description: 'Estilo personalizado com as últimas tendências.', price: 50, duration: 45 },
-        { id: '2', name: 'Barba Tradicional', description: 'Modelagem de barba com toalha quente e navalha.', price: 35, duration: 30 },
-        { id: '3', name: 'Penteado', description: 'Finalização com produtos de alta qualidade.', price: 25, duration: 20 },
-        { id: '4', name: 'Coloração Masculina', description: 'Cobertura de grisalhos ou mudança de cor.', price: 80, duration: 60 },
-    ];
-
-    const getServiceById = (id) => initialServices.find(s => s.id === id);
-
-    const createServiceCard = (service) => {
-        const card = document.createElement('div');
-        card.className = 'service-card';
-        card.dataset.id = service.id;
-        updateCard(card, service);
-        return card;
-    };
-
-    const updateCard = (card, service) => {
-        card.innerHTML = `
-            <div class="service-card-header">
-                <h3>${service.name}</h3>
-                <p>${service.description}</p>
-            </div>
-            <div class="service-card-footer">
-                <span class="price">R$${service.price.toFixed(2)}</span>
-                <span class="duration"><i class="fas fa-clock"></i> ${service.duration} min</span>
-                <div class="card-actions">
-                    <button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>
-                    <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
-                </div>
-            </div>
-        `;
-    };
-
-    const renderServices = () => {
-        if(!servicesContainer) return;
-        servicesContainer.innerHTML = '';
-        initialServices.forEach(service => {
-            const card = createServiceCard(service);
-            servicesContainer.appendChild(card);
-        });
-    };
 
     // Initial Render
     renderServices();
