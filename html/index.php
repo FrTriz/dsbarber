@@ -11,7 +11,7 @@
 <body>
     <header>
         <nav>
-            <a href="/html/index.html" class="logo"><img src="/Ds_Barber_Logo.png" width="130px" height="120px"></a>
+            <a href="index.php" class="logo"><img src="/Ds_Barber_Logo.png" width="130px" height="120px"></a>
             <div class="auth-buttons">
                 <a href="login.php" class="login-btn-nav">Login</a>
                 <a href="signup.php" class="signup-btn-nav">Cadastro</a>
@@ -25,7 +25,7 @@
                 <div class="hero-content">
                     <h1>A Arte de um Corte Perfeito</h1>
                     <p>Experimente precisão e estilo em nossa barbearia moderna. Seu próximo visual te espera.</p>
-                    <a href="schedule.html" class="cta-button">Agendar um Corte</a>
+                    <a href="schedule.php" class="cta-button">Agendar um Corte</a>
                 </div>
             </section>
         </div>

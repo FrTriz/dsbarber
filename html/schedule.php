@@ -1,3 +1,15 @@
+<?php
+require_once '../php/conexao.php'; 
+require_once '../php/Classes/ServicosClass.php'; 
+require_once '../php/Classes/UsuarioClass.php';
+
+// Buscar os Serviços
+$servicosObj = new Servicos($pdo);
+$listaServicos = $servicosObj->listarServicos();
+
+$usuarioObj = new Usuario($pdo);
+$listaBarbeiros = $usuarioObj->listarPorTipo('barbeiro'); // <-- ADICIONADO
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -43,80 +55,46 @@
                 <!-- Step 1: Choose Barber -->
                 <div class="step-content active" id="step-1">
                     <h2>Escolha seu Barbeiro</h2>
-                    <p class="step-subtitle">Selecione seu profissional de preferência.</p>
+                    <p class="step-subtitle">Selecione seu profissional de preferência.</p> 
                     <div class="barber-selection">
-                        <div class="barber-card selected" data-barber="Jameson" data-title="Barbeiro Mestre">
-                            <img src="https://i.pravatar.cc/150?u=jameson" alt="Barbeiro 1">
-                            <div class="barber-info">
-                                <h3>Jameson</h3>
-                                <h4>Barbeiro Mestre</h4>
-                                <p>Especialista em cortes clássicos, toalha quente e modelagem de barba com mais de 15 anos de experiência.</p>
+
+                        <?php foreach ($listaBarbeiros as $barbeiro): ?>
+                            <div class="barber-card" 
+                                data-barbeiro-id="<?php echo htmlspecialchars($barbeiro['id_usuario']); ?>"
+                                data-barbeiro-nome="<?php echo htmlspecialchars($barbeiro['nome']); ?>">
+                                
+                                <img src="https://i.pravatar.cc/150?u=<?php echo htmlspecialchars($barbeiro['id_usuario']); ?>" alt="Foto de <?php echo htmlspecialchars($barbeiro['nome']); ?>">
+                                <div class="barber-info">
+                                    <h3><?php echo htmlspecialchars($barbeiro['nome']); ?></h3>
+                                    <h4>Barbeiro</h4> <p>Profissional qualificado da equipe DsBarber.</p> </div>
                             </div>
-                        </div>
-                        <div class="barber-card" data-barber="Cody" data-title="Estilista Sênior">
-                            <img src="https://i.pravatar.cc/150?u=cody" alt="Barbeiro 2">
-                            <div class="barber-info">
-                                <h3>Cody</h3>
-                                <h4>Estilista Sênior</h4>
-                                <p>Expert em penteados modernos, fades e tratamentos de cor. Perfeito para um look novo e contemporâneo.</p>
-                            </div>
-                        </div>
-                        <div class="barber-card" data-barber="Alex" data-title="Barbeiro">
-                            <img src="https://i.pravatar.cc/150?u=alex" alt="Barbeiro 3">
-                            <div class="barber-info">
-                                <h3>Alex</h3>
-                                <h4>Barbeiro</h4>
-                                <p>Habilidoso em todos os aspectos da barbearia, de cortes tradicionais a estilos modernos. Grande atenção aos detalhes.</p>
-                            </div>
-                        </div>
-                        <div class="barber-card" data-barber="Marco" data-title="Barbeiro Júnior">
-                            <img src="https://i.pravatar.cc/150?u=marco" alt="Barbeiro 4">
-                            <div class="barber-info">
-                                <h3>Marco</h3>
-                                <h4>Barbeiro Júnior</h4>
-                                <p>Apaixonado e um talentoso recém-chegado, oferecendo ótimo serviço para cortes e aparos padrão a um preço competitivo.</p>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
+
                     </div>
                 </div>
 
                 <!-- Step 2: Choose Service -->
-                <div class="step-content" id="step-2">
+               <div class="step-content" id="step-2">
                     <h2>Escolha seu(s) Serviço(s)</h2>
-                    <p class="step-subtitle">Selecione um ou mais serviços. Você pode selecionar múltiplos.</p>
+                    <p class="step-subtitle">Selecione um ou mais serviços. [cite: 124-125] Você pode selecionar múltiplos.</p>
                     <div class="service-selection">
-                        <div class="service-card" data-service="Corte de Cabelo Moderno" data-price="45">
-                            <div class="service-info">
-                                <h3>Corte de Cabelo Moderno</h3>
-                                <p>Corte de precisão, estilizado à perfeição. Inclui lavagem e condicionamento.</p>
+                        
+                        <?php foreach ($listaServicos as $servico): ?>
+                            <div class="service-card" 
+                                data-service-id="<?php echo htmlspecialchars($servico['id_servico']); ?>"
+                                data-service-nome="<?php echo htmlspecialchars($servico['nome']); ?>"
+                                data-price="<?php echo htmlspecialchars($servico['preco']); ?>"
+                                data-duration="<?php echo htmlspecialchars($servico['duracao_minutos']); ?>">
+                                
+                                <div class="service-info">
+                                    <h3><?php echo htmlspecialchars($servico['nome']); ?></h3>
+                                    <p><?php echo htmlspecialchars($servico['descricao']); ?></p>
+                                </div>
+                                <div class="service-price">R$<?php echo number_format($servico['preco'], 2, ',', '.'); ?></div>
+                                <div class="service-checkbox"></div>
                             </div>
-                            <div class="service-price">R$45</div>
-                            <div class="service-checkbox"></div>
-                        </div>
-                        <div class="service-card" data-service="Aparo e Modelagem de Barba" data-price="25">
-                            <div class="service-info">
-                                <h3>Aparo e Modelagem de Barba</h3>
-                                <p>Modelagem e aparo especializados para definir o estilo da sua barba.</p>
-                            </div>
-                            <div class="service-price">R$25</div>
-                            <div class="service-checkbox"></div>
-                        </div>
-                        <div class="service-card" data-service="Toalha Quente" data-price="30">
-                            <div class="service-info">
-                                <h3>Toalha Quente</h3>
-                                <p>Barbear clássico com navalha e toalhas quentes para um acabamento suave.</p>
-                            </div>
-                            <div class="service-price">R$30</div>
-                            <div class="service-checkbox"></div>
-                        </div>
-                        <div class="service-card" data-service="Corte Infantil (Menor de 12)" data-price="30">
-                            <div class="service-info">
-                                <h3>Corte Infantil (Menor de 12)</h3>
-                                <p>Um corte estiloso e confortável para nossos clientes mais jovens.</p>
-                            </div>
-                            <div class="service-price">R$30</div>
-                            <div class="service-checkbox"></div>
-                        </div>
+                        <?php endforeach; ?>
+
                     </div>
                 </div>
 
@@ -138,28 +116,11 @@
                                 <!-- Os dias serão gerados por JS -->
                             </div>
                         </div>
-                        <div class="time-slots">
+                       <div class="time-slots">
                             <h3>Horários Disponíveis</h3>
-                            <div class="slots-category">
-                                <h4>Manhã</h4>
-                                <div class="slots">
-                                    <button class="time-slot">09:00</button>
-                                    <button class="time-slot">09:30</button>
-                                    <button class="time-slot">10:00</button>
-                                    <button class="time-slot">10:30</button>
-                                    <button class="time-slot">11:30</button>
-                                </div>
-                            </div>
-                            <div class="slots-category">
-                                <h4>Tarde</h4>
-                                <div class="slots">
-                                    <button class="time-slot">13:00</button>
-                                    <button class="time-slot selected">13:30</button>
-                                    <button class="time-slot">14:00</button>
-                                    <button class="time-slot">14:30</button>
-                                    <button class="time-slot">15:00</button>
-                                    <button class="time-slot">16:00</button>
-                                </div>
+                            
+                            <div class="slots" id="dynamic-slots-container">
+                                <p class="no-slots">Por favor, selecione um dia no calendário.</p>
                             </div>
                         </div>
                     </div>
@@ -243,6 +204,10 @@
         </div>
     </main>
 
-    <script src="../js/schedule.js"></script>
+    <script>
+    const servicosVindosDoBanco = <?php echo json_encode($listaServicos); ?>;
+</script>
+
+    <script src="../js/schedule.js?v=1.2"></script>
 </body>
 </html>
