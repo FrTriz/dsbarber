@@ -272,12 +272,92 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Navigation (Seu código está perfeito, sem mudanças)
-    nextBtn.addEventListener('click', () => {
+   // --- Navigation (MODIFICADO para validar e finalizar) ---
+    
+    nextBtn.addEventListener('click', async () => { // <-- Tornamos 'async'
+        
         if (state.currentStep < 4) {
+            
+            // --- VALIDAÇÃO (Impede o cliente de avançar sem escolher) ---
+            if (state.currentStep === 1 && !state.barbeiroId) {
+                alert('Por favor, selecione um barbeiro para continuar.');
+                return;
+            }
+            if (state.currentStep === 2 && state.servicos.length === 0) {
+                alert('Por favor, selecione pelo menos um serviço.');
+                return;
+            }
+            if (state.currentStep === 3 && (!state.date || !state.time)) {
+                alert('Por favor, selecione uma data e um horário.');
+                return;
+            }
+            
+            // Se passou na validação, avança
             goToStep(state.currentStep + 1);
+        
+        } else if (state.currentStep === 4) {
+            
+            // --- LÓGICA DE FINALIZAÇÃO (PASSO 4) ---
+            // O botão agora é "Confirmar Agendamento"
+            
+            nextBtn.disabled = true; // Desabilita o botão para evitar clique duplo
+            nextBtn.textContent = 'Processando...';
+
+            try {
+                // 1. Chamar o 'criar-agendamento.php'
+                const response = await fetch('../php/Funcoes/criar-agendamento.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    // Envia todo o objeto 'state' como JSON
+                    body: JSON.stringify(state) 
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha ao se comunicar com o servidor.');
+                }
+
+                const data = await response.json();
+
+                if (!data.sucesso) {
+                    // Se o PHP deu um erro (ex: "Usuário não logado")
+                    throw new Error(data.mensagem || 'Erro desconhecido no back-end.');
+                }
+
+                // 2. SUCESSO! O agendamento e o pagamento foram criados no banco.
+                console.log('Agendamento criado (ID):', data.id_agendamento);
+                console.log('Pagamento criado (ID):', data.id_pagamento);
+                console.log('Valor a Pagar:', data.valor_a_pagar);
+                
+                // Salva os IDs para o próximo passo (API do Mercado Pago)
+                state.id_agendamento = data.id_agendamento;
+                state.id_pagamento = data.id_pagamento;
+
+                // --- PRÓXIMO PASSO (A SER FEITO): ---
+                // Agora é a hora de chamar a API do Mercado Pago
+                // Vamos criar uma função para isso.
+                
+                alert('Agendamento pendente criado! Próximo passo: Gerar o PIX real.');
+                
+                // (Aqui chamaremos a função para gerar o PIX)
+                // gerarPixMercadoPago(data.id_pagamento, data.valor_a_pagar);
+                
+                nextBtn.textContent = 'Agendamento Realizado';
+                // (O botão "Já Paguei" do seu HTML [cite: 88-89] ainda não foi implementado)
+                const jaPagueiBtn = document.querySelector('.confirm-payment-btn');
+                if(jaPagueiBtn) jaPagueiBtn.style.display = 'block';
+
+
+            } catch (error) {
+                console.error('Erro ao criar agendamento:', error);
+                alert('Erro: ' + error.message);
+                nextBtn.disabled = false; // Reabilita o botão
+                nextBtn.textContent = 'Confirmar Agendamento';
+            }
         }
     });
+
     backBtn.addEventListener('click', () => {
         if (state.currentStep > 1) {
             goToStep(state.currentStep - 1);

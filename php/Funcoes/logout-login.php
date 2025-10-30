@@ -1,7 +1,11 @@
 <?php
-session_start();
+
+require_once '../session-manager.php';
+
+
 session_unset();
 session_destroy();
 
-header("Location: /index.php?status=logout-sucesso");
-exit(); 
+header('Location: ../../html/index.php');
+exit();
+?>

@@ -1,3 +1,60 @@
+<?php
+require_once '../php/session-manager.php';
+require_once '../php/conexao.php'; 
+require_once '../php/Classes/UsuarioClass.php'; 
+
+// 1. Segurança
+if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_tipo'] !== 'admin' && $_SESSION['usuario_tipo'] !== 'barbeiro')) {
+    $_SESSION['erro_login'] = "Acesso não autorizado.";
+    header('Location: login.php');
+    exit();
+}
+
+// 2. Obter dados do usuário logado
+$usuarioLogadoId = $_SESSION['usuario_id'];
+$usuarioLogadoNome = $_SESSION['usuario_nome'];
+$usuarioLogadoTipo = $_SESSION['usuario_tipo']; // Pega o TIPO (admin ou barbeiro)
+
+// 3. Buscar Lista de Barbeiros (Para o Filtro)
+$usuarioObj = new Usuario($pdo);
+$listaBarbeiros = $usuarioObj->listarPorTipo('barbeiro'); 
+
+// 4. Buscar Agendamentos Iniciais (Mês Atual) - COM A LÓGICA CORRETA
+$mesAtual = date('Y-m');
+try {
+    // Começa a query base
+    $sqlBase = "SELECT 
+                id_agendamento, 
+                DATE(data_hora_inicio) as dia, 
+                TIME(data_hora_inicio) as hora_inicio_fmt, 
+                nome_cliente, 
+                servicos_agendados, 
+                status_agendamento,
+                id_barbeiro 
+            FROM vw_agendamentos_completos 
+            WHERE DATE_FORMAT(data_hora_inicio, '%Y-%m') = :mes_ano";
+            
+    $params = [':mes_ano' => $mesAtual];
+
+    // **** A CORREÇÃO ESTÁ AQUI ****
+    // Se o usuário logado for um 'barbeiro', adiciona o filtro.
+    // Se for 'admin', o filtro NÃO é adicionado (e ele vê tudo).
+    if ($usuarioLogadoTipo === 'barbeiro') {
+        $sqlBase .= " AND id_barbeiro = :id_barbeiro";
+        $params[':id_barbeiro'] = $usuarioLogadoId;
+    }
+    
+    $sqlBase .= " ORDER BY data_hora_inicio ASC";
+            
+    $stmt = $pdo->prepare($sqlBase);
+    $stmt->execute($params);
+    $agendamentosDoMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    error_log("Erro ao buscar agendamentos: " . $e->getMessage());
+    $agendamentosDoMes = []; 
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -19,10 +76,10 @@
             
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="admin.html" class="active"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
+                    <li><a href="admin.php" class="active"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
                     <li><a href="services.php"><i class="fas fa-concierge-bell"></i> Serviços</a></li>
-                    <li><a href="barbers.html"><i class="fas fa-cut"></i> Barbeiros</a></li>
-                    <li><a href="reports.html"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                    <li><a href="barbers.php"><i class="fas fa-cut"></i> Barbeiros</a></li>
+                    <li><a href="reports.php"><i class="fas fa-chart-line"></i> Relatórios</a></li>
                 </ul>
             </nav>
             <div class="user-info">
@@ -45,10 +102,17 @@
                 <div class="header-actions">
                     <div class="filter-dropdown">
                         <button class="filter-btn" data-dropdown="barber-dropdown">Barbeiro <i class="fas fa-chevron-down"></i></button>
-                        <div id="barber-dropdown" class="dropdown-menu">
-                            <a href="#" data-value="all">Todos os Barbeiros</a>
-                            <a href="#" data-value="John Wick">John Wick</a>
-                            <a href="#" data-value="Mike Ross">Mike Ross</a>
+                       <div id="barber-dropdown" class="dropdown-menu">
+                            <?php if ($usuarioLogadoTipo === 'admin'): ?>
+                                <a href="#" data-value="all">Todos os Barbeiros</a>
+                                <?php foreach ($listaBarbeiros as $barbeiro): ?>
+                                    <a href="#" data-value="<?php echo htmlspecialchars($barbeiro['id_usuario']); ?>">
+                                        <?php echo htmlspecialchars($barbeiro['nome']); ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <a href="#" data-value="<?php echo htmlspecialchars($usuarioLogadoId); ?>"><?php echo htmlspecialchars($usuarioLogadoNome); ?></a>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <div class="filter-dropdown">
@@ -120,6 +184,13 @@
         </div>
     </div>
 
-    <script src="../js/admin.js"></script>
+    <script>
+        // Passa os agendamentos do mês atual para o JS
+        const agendamentosIniciais = <?php echo json_encode($agendamentosDoMes); ?>;
+        // Passa o ID do usuário logado para o JS (útil para futuras requisições)
+        const idUsuarioLogado = <?php echo json_encode($usuarioLogadoId); ?>; 
+    </script>
+    
+    <script src="../js/admin.js?v=1.1"></script>
 </body>
 </html>

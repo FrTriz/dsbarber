@@ -1,4 +1,14 @@
 <?php
+
+require_once '../php/session-manager.php';
+
+if (!isset($_SESSION['usuario_id']) || empty($_SESSION['usuario_id'])) {
+    
+    $_SESSION['erro_login'] = "Você precisa estar logado para agendar um horário.";
+    
+    header('Location: login.php');
+    exit(); // Para a execução do script imediatamente
+}
 require_once '../php/conexao.php'; 
 require_once '../php/Classes/ServicosClass.php'; 
 require_once '../php/Classes/UsuarioClass.php';

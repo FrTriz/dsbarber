@@ -22,10 +22,10 @@
             
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="admin.html"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
+                    <li><a href="admin.php"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
                     <li><a href="services.php"><i class="fas fa-concierge-bell"></i> Serviços</a></li>
-                    <li><a href="barbers.html"><i class="fas fa-cut"></i> Barbeiros</a></li>
-                    <li><a href="reports.html" class="active"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                    <li><a href="barbers.php"><i class="fas fa-cut"></i> Barbeiros</a></li>
+                    <li><a href="reports.php" class="active"><i class="fas fa-chart-line"></i> Relatórios</a></li>
                 </ul>
             </nav>
             <div class="user-info">

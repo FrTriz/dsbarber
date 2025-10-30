@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             } elseif ($usuario['tipo'] === 'barbeiro') {
                 // ADICIONADO: Lógica para o barbeiro
-                header('Location: ../../barbeiro_agenda.php'); 
+                header('Location: ../../html/admin.php'); 
                 exit;
             
             } else {

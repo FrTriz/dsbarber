@@ -1,3 +1,6 @@
+<?php
+require_once '../php/session-manager.php';
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,8 +16,18 @@
         <nav>
             <a href="index.php" class="logo"><img src="/Ds_Barber_Logo.png" width="130px" height="120px"></a>
             <div class="auth-buttons">
-                <a href="login.php" class="login-btn-nav">Login</a>
-                <a href="signup.php" class="signup-btn-nav">Cadastro</a>
+                <?php if (isset($_SESSION['usuario_nome'])) : ?>
+                    <span class="welcome-message">
+                        Olá, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!
+                    </span>
+                    <a href="../php/Funcoes/logout-login.php" class="btn-logout">Sair</a>
+
+                <?php else : ?>
+                    <a href="../html/login.php" class="btn-login">Login</a>
+                    <a href="../html/signup.php" class="btn-cadastro">Cadastro</a>
+
+                <?php endif; ?>
+
             </div>
         </nav>
     </header>

@@ -1,3 +1,7 @@
+<?php
+// Garante que a sessão está iniciada (coloque seu 'require_once' aqui)
+require_once '../php/session-manager.php'; 
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,6 +12,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+               <script>
+        <?php
+        // 1. Verifica se o PHP enviou uma mensagem de erro na sessão
+        if (isset($_SESSION['erro_login']) && !empty($_SESSION['erro_login'])) {
+            
+            // 2. Imprime o JavaScript para mostrar o alerta
+            // (Usamos json_encode para garantir que o texto não quebre o JS)
+            echo "alert(" . json_encode($_SESSION['erro_login']) . ");";
+            
+            // 3. Limpa o erro da sessão
+            // (Isso impede que o pop-up apareça de novo se o usuário der F5)
+            unset($_SESSION['erro_login']);
+        }
+        ?>
+    </script>
     <div class="container">
         <div class="left-panel">
             <h1>Ds Barber</h1>
