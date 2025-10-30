@@ -14,7 +14,7 @@ require_once '../php/session-manager.php';
 <body>
     <header>
         <nav>
-            <a href="index.php" class="logo"><img src="/Ds_Barber_Logo.png" width="130px" height="120px"></a>
+            <a href="index.php" class="logo"><img src="../Ds_Barber_Logo.png" width="130px" height="120px"></a>
             <div class="auth-buttons">
                 <?php if (isset($_SESSION['usuario_nome'])) : ?>
                     <span class="welcome-message">
@@ -108,7 +108,7 @@ require_once '../php/session-manager.php';
     <footer>
         <div class="footer-content">
             <div class="footer-section">
-                <a href="#" class="logo"><img src="/Ds_Barber_Logo.png" width="85px" height="80px"></a>
+                <a href="#" class="logo"><img src="../Ds_Barber_Logo.png" width="85px" height="80px"></a>
                 <p>Estilo e precisão em cada corte. A sua barbearia moderna.</p>
                 <div class="social-icons">
                     <a href="#"><i class="fab fa-instagram"></i></a>

@@ -69,7 +69,7 @@ try {
     <div class="admin-panel">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <a href="#" class="logo"><img src="/Ds_Barber_Logo.png" width="130px" height="120px"></a>
+                <a href="#" class="logo"><img src="../Ds_Barber_Logo.png" width="130px" height="120px"></a>
                 <button id="close-sidebar-btn" class="close-sidebar-btn"><i class="fas fa-times"></i>
                 </button>
             </div>
