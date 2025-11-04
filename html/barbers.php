@@ -1,3 +1,21 @@
+<?php
+require_once '../php/session-manager.php';
+require_once '../php/conexao.php'; 
+require_once '../php/Classes/UsuarioClass.php'; 
+
+// 1. Segurança
+if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_tipo'] !== 'admin' && $_SESSION['usuario_tipo'] !== 'barbeiro')) {
+    $_SESSION['erro_login'] = "Acesso não autorizado.";
+    header('Location: login.php');
+    exit();
+}
+
+// 2. Obter dados do usuário logado
+$usuarioLogadoId = $_SESSION['usuario_id'];
+$usuarioLogadoNome = $_SESSION['usuario_nome'];
+$usuarioLogadoTipo = $_SESSION['usuario_tipo']; // Pega o TIPO (admin ou barbeiro)
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -30,9 +48,11 @@
                 </ul>
             </nav>
             <div class="user-info">
-                <img src="https://i.pravatar.cc/150?u=johnwick" alt="User Avatar">
-                <div class="user-details"><span class="user-name">John Wick</span><span class="user-email">john@dsbarber.com</span></div>
-                <a href="#" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                <img src="https://i.pravatar.cc/150?u=<?php echo htmlspecialchars($usuarioLogadoId); ?>" alt="User Avatar">
+                <div class="user-details">
+                    <span class="user-name"><?php echo htmlspecialchars($usuarioLogadoNome); ?></span>
+                </div>
+                <a href="../php/Funcoes/logout.php" class="logout-icon" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </aside>
         <div id="overlay" class="overlay"></div>

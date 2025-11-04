@@ -69,7 +69,7 @@ try {
     <div class="admin-panel">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <a href="#" class="logo"><img src="../Ds_Barber_Logo.png" width="130px" height="120px"></a>
+                <a href="#" class="logo"><img src="/Ds_Barber_Logo.png" width="130px" height="120px"></a>
                 <button id="close-sidebar-btn" class="close-sidebar-btn"><i class="fas fa-times"></i>
                 </button>
             </div>
@@ -83,12 +83,11 @@ try {
                 </ul>
             </nav>
             <div class="user-info">
-                <img src="https://i.pravatar.cc/150?u=johnwick" alt="User Avatar">
+                <img src="https://i.pravatar.cc/150?u=<?php echo htmlspecialchars($usuarioLogadoId); ?>" alt="User Avatar">
                 <div class="user-details">
-                    <span class="user-name">John Wick</span>
-                    <span class="user-email">john@dsbarber.com</span>
+                    <span class="user-name"><?php echo htmlspecialchars($usuarioLogadoNome); ?></span>
                 </div>
-                <a href="#" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                <a href="../php/Funcoes/logout.php" class="logout-icon" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </aside>
         <div id="overlay" class="overlay"></div>
