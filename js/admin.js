@@ -107,10 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Cria o elemento HTML para um dia
-     * (MODIFICADO para suportar o margin-top no CSS)
-     */
     function createDayElement(day, month, year, isOtherMonth, appointments = []) {
         const dayEl = document.createElement('div');
         dayEl.classList.add('day');
@@ -123,15 +119,13 @@ document.addEventListener('DOMContentLoaded', () => {
             dayEl.dataset.appointments = JSON.stringify(appointments); 
         }
         
-        // 1. Cria e adiciona o número
         const dayNumberSpan = document.createElement('span');
         dayNumberSpan.className = 'day-number';
         dayNumberSpan.textContent = day;
         dayEl.appendChild(dayNumberSpan);
 
-        // 2. Cria e adiciona o container de agendamentos
         const appointmentsContainer = document.createElement('div');
-        appointmentsContainer.className = 'appointments'; // Esta classe agora tem o margin-top no CSS
+        appointmentsContainer.className = 'appointments';
 
         const maxAppointmentsToShow = 3;
         
@@ -155,9 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             appointmentsContainer.appendChild(moreLink);
         }
         
-        // Adiciona o container ao dia
         dayEl.appendChild(appointmentsContainer);
-        // Adiciona o dia ao grid
         calendarGrid.appendChild(dayEl);
     }
 
@@ -169,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const showAppointmentModal = () => appointmentModal.classList.add('show');
     const hideAppointmentModal = () => appointmentModal.classList.remove('show');
     
+    /**
+     * MODIFICADO: Agora inclui o botão "Confirmar"
+     */
     const showDayDetailsModal = (day, month, year, appointments) => {
         const date = new Date(year, month, day);
         const titleDate = date.toLocaleDateString('pt-BR', { 
@@ -192,6 +187,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const precoFormatado = apt.valor_total ? 
                     parseFloat(apt.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 
                     'N/A';
+                
+                // --- (NOVO) Lógica do Botão ---
+                let buttonHtml = '';
+                if (statusClasse === 'pending') {
+                    buttonHtml = `
+                        <div class="appointment-detail-footer">
+                            <button class="btn-confirm-manual" data-id="${apt.id_agendamento}">
+                                Confirmar Pagamento
+                            </button>
+                        </div>
+                    `;
+                }
+                // --- Fim da Lógica do Botão ---
 
                 detailEl.innerHTML = `
                     <h4>
@@ -200,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </h4>
                     <p><i class="fas fa-concierge-bell"></i> ${apt.servicos_agendados || 'N/A'}</p>
                     <p><i class="fas fa-dollar-sign"></i> ${precoFormatado}</p>
+                    ${buttonHtml}
                 `;
                 dayDetailsList.appendChild(detailEl);
             });
@@ -209,9 +218,62 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const hideDayDetailsModal = () => {
-        // Não precisamos mais remover o estado ativo
         dayDetailsModal.classList.remove('show');
     };
+    
+    /**
+     * (NOVO) Função para lidar com a confirmação manual
+     */
+    async function handleManualConfirmation(idAgendamento, buttonElement) {
+        buttonElement.disabled = true;
+        buttonElement.textContent = 'Confirmando...';
+
+        try {
+            const formData = new FormData();
+            formData.append('id_agendamento', idAgendamento);
+
+            const response = await fetch('../php/Funcoes/confirmar-agendamento.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!data.sucesso) {
+                throw new Error(data.mensagem || 'Erro desconhecido no servidor.');
+            }
+
+            // --- SUCESSO! Atualizar a UI ---
+            
+            // 1. Atualizar o item no modal
+            const detailElement = buttonElement.closest('.appointment-detail');
+            const badgeElement = detailElement.querySelector('.status-badge');
+            
+            detailElement.classList.remove('status-pending');
+            detailElement.classList.add('status-confirmed');
+            
+            badgeElement.classList.remove('pending');
+            badgeElement.classList.add('confirmed');
+            badgeElement.textContent = 'Confirmado';
+            
+            buttonElement.closest('.appointment-detail-footer').remove(); // Remove o rodapé com o botão
+
+            // 2. Atualizar o estado global (para o calendário)
+            const index = currentAppointments.findIndex(apt => apt.id_agendamento == idAgendamento);
+            if (index > -1) {
+                currentAppointments[index].status_agendamento = 'confirmado';
+            }
+
+            // 3. Redesenhar o calendário principal (sem fechar o modal)
+            generateCalendar(currentDate);
+
+        } catch (error) {
+            console.error('Erro ao confirmar:', error);
+            alert('Falha ao confirmar: ' + error.message);
+            buttonElement.disabled = false;
+            buttonElement.textContent = 'Confirmar Pagamento';
+        }
+    }
 
     
     function toggleDropdown(e) {
@@ -273,7 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === dayDetailsModal) hideDayDetailsModal();
     });
     
-    // Listener de clique no dia (agora sem a lógica de estado ativo)
     calendarGrid.addEventListener('click', (e) => {
         const dayElement = e.target.closest('.day');
         if (!dayElement || dayElement.classList.contains('other-month')) {
@@ -287,6 +348,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         showDayDetailsModal(day, month, year, appointments);
     });
+
+    // --- (NOVO) Listener para o clique no botão "Confirmar" ---
+    dayDetailsList.addEventListener('click', (e) => {
+        const confirmButton = e.target.closest('.btn-confirm-manual');
+        if (confirmButton) {
+            const id = confirmButton.dataset.id;
+            handleManualConfirmation(id, confirmButton);
+        }
+    });
+    
     
     document.getElementById('appointment-form').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -294,10 +365,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const date = document.getElementById('appointment-date').value;
         currentAppointments.push({ 
             dia: date, 
+            id_agendamento: Date.now(), // ID Fictício
             hora_inicio_fmt: '12:00', 
             nome_cliente: document.getElementById('client-name').value, 
             servicos_agendados: document.getElementById('appointment-service').value, 
-            status_agendamento: 'confirmado',
+            status_agendamento: 'pendente', // Mude para 'pendente' para testar
             valor_total: 50
         });
         generateCalendar(currentDate);
