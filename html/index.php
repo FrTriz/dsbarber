@@ -20,6 +20,7 @@ require_once '../php/session-manager.php';
                     <span class="welcome-message">
                         Olá, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!
                     </span>
+                    <a href="../html/meus-agendamentos.php" class="btn-meus-agendamentos">Meus Agendamentos</a>
                     <a href="../php/Funcoes/logout-login.php" class="btn-logout">Sair</a>
 
                 <?php else : ?>

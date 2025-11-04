@@ -1,0 +1,195 @@
+/* Estilos para a página meus-agendamentos.php */
+
+.container-meus-agendamentos {
+    max-width: 900px;
+    /* Remove a margem superior para funcionar com o padding-top do body */
+    margin: 40px auto; 
+    padding: 20px;
+}
+
+.container-meus-agendamentos h1 {
+    font-size: 2.5rem;
+    color: var(--text-light);
+    border-bottom: 2px solid var(--accent-green);
+    padding-bottom: 10px;
+    margin-bottom: 40px;
+}
+
+/* Container para os cards */
+#lista-agendamentos {
+    display: grid;
+    gap: 20px;
+}
+
+.agendamento-card {
+    background-color: var(--bg-card-green);
+    border-radius: 10px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Permite quebrar em telas menores */
+    border: 1px solid #2a342f;
+    gap: 20px; /* Espaço entre info e ação quando quebrar */
+}
+
+.agendamento-info {
+    flex: 2; /* Ocupa mais espaço */
+    min-width: 250px;
+}
+
+.agendamento-info h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.3rem;
+    color: #f0f0f0;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #ccc;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.info-item i {
+    color: #aaa;
+    width: 20px;
+    text-align: center;
+}
+
+/* --- Alinhamento dos Botões (Corrigido) --- */
+
+.agendamento-acao {
+    flex: 1; 
+    min-width: 160px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-end; 
+    gap: 10px; 
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    width: 150px; 
+    box-sizing: border-box; 
+}
+.status-badge.pending {
+    background-color: rgba(251, 191, 36, 0.2);
+    color: #FBBF24;
+}
+.status-badge.confirmed {
+    background-color: rgba(46, 182, 125, 0.2);
+    color: #2EB67D;
+}
+.status-badge.canceled,
+.status-badge.concluido {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+}
+
+.acao-buttons {
+    display: flex;
+    flex-direction: column; 
+    gap: 8px; 
+    width: 150px; 
+}
+
+.btn-pagar {
+    background-color: var(--accent-green);
+    color: #fff;
+    border: 1px solid var(--accent-green);
+    padding: 10px 15px; 
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%; 
+    text-align: center;
+    font-size: 0.9rem; 
+    box-sizing: border-box; 
+    transition: background-color 0.2s;
+}
+.btn-pagar:hover {
+    background-color: #259c6b; 
+}
+
+.btn-cancelar {
+    background-color: transparent;
+    color: #e53e3e; 
+    border: 1px solid #e53e3e;
+    padding: 10px 15px; 
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%; 
+    text-align: center;
+    font-size: 0.9rem;
+    box-sizing: border-box; 
+    transition: background-color 0.2s, color 0.2s;
+}
+.btn-cancelar:hover {
+    background-color: #e53e3e;
+    color: #fff;
+}
+.btn-cancelar:disabled {
+    color: #aaa;
+    border-color: #aaa;
+    background-color: transparent;
+    cursor: not-allowed;
+}
+
+/* Mensagem de carregamento ou erro */
+.loading-message,
+.error-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #aaa;
+    padding: 40px;
+}
+
+/* --- Media Query para o corpo de "Meus Agendamentos" --- */
+@media (max-width: 600px) {
+    .container-meus-agendamentos {
+        margin-top: 20px;
+        padding: 10px;
+    }
+    
+    .container-meus-agendamentos h1 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+
+    .agendamento-card {
+        padding: 20px;
+    }
+    
+    /* Quando o card quebra: */
+    
+    .agendamento-info {
+        /* Garante que a informação ocupe 100% da largura */
+        flex-basis: 100%; 
+    }
+    
+    .agendamento-acao {
+        /* Ocupa 100% da largura e centraliza os botões */
+        flex-basis: 100%; 
+        align-items: center; /* Centraliza a pilha */
+    }
+    
+    .status-badge,
+    .acao-buttons {
+        /* Aumenta a largura dos botões/badge no celular */
+        width: 100%; 
+        max-width: 250px; /* Limite */
+    }
+}
