@@ -433,6 +433,77 @@ body {
 .appointment.pending { background-color: #FBBF24; color: #1A201D; }
 .appointment.canceled { background-color: #4B5563; color: #aaa; text-decoration: line-through; }
 
+
+/* 1. Empurra o container de agendamentos para baixo do número */
+.day .appointments {
+    margin-top: 28px; 
+}
+
+/* 2. Muda o estilo do "+N mais" para não parecer um link */
+.day .day-more-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: #aaa; /* Cor neutra (cinza) */
+    text-align: center;
+    padding: 4px;
+    margin-top: 5px;
+}
+.day .day-more-link:hover {
+    text-decoration: none; /* Remove sublinhado */
+}
+
+/* 3. Adiciona o efeito de HOVER ao passar o mouse */
+.day:not(.other-month):hover {
+    background-color: #3a443f; /* Um tom ligeiramente mais claro que #2a342f */
+    transition: background-color 0.2s ease;
+}
+
+/* Estilos para a lista de detalhes no modal */
+#day-details-list .appointment-detail {
+    background-color: #2a342f;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border-left: 4px solid var(--accent-green);
+    /* Remove o text-align: left dos agendamentos do calendário */
+    text-align: left; 
+}
+
+#day-details-list .appointment-detail h4 {
+    font-size: 1.1rem;
+    color: #f0f0f0;
+    margin: 0 0 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#day-details-list .appointment-detail p {
+    margin: 4px 0;
+    color: #ccc;
+    font-size: 0.95rem;
+}
+
+#day-details-list .appointment-detail p i {
+    color: #aaa;
+    width: 20px;
+    text-align: center;
+    margin-right: 5px;
+}
+
+/* Classes de status para o modal */
+#day-details-list .status-confirmed { border-left-color: #2EB67D; }
+#day-details-list .status-pending { border-left-color: #FBBF24; }
+#day-details-list .status-canceled { border-left-color: #6B7280; }
+
+#day-details-list .status-badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+#day-details-list .status-badge.confirmed { color: #2EB67D; }
+#day-details-list .status-badge.pending { color: #FBBF24; }
+#day-details-list .status-badge.canceled { color: #6B7280; }
+
 /* Responsive Styles */
 @media (max-width: 992px) {
     .sidebar { position: fixed; left: 0; top: 0; height: 100%; transform: translateX(-100%); }

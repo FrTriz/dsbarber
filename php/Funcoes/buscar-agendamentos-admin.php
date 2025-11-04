@@ -30,7 +30,8 @@ try {
                     nome_cliente, 
                     servicos_agendados, 
                     status_agendamento,
-                    id_barbeiro -- Adicionado para a lógica de filtro
+                    id_barbeiro,
+                    valor_total
                 FROM vw_agendamentos_completos";
                 
     $conditions = ["DATE_FORMAT(data_hora_inicio, '%Y-%m') = :mes_ano"];

@@ -118,9 +118,9 @@ try {
                         <button class="filter-btn" data-dropdown="status-dropdown">Status <i class="fas fa-chevron-down"></i></button>
                         <div id="status-dropdown" class="dropdown-menu">
                             <a href="#" data-value="all">Todos os Status</a>
-                            <a href="#" data-value="confirmed">Confirmado</a>
-                            <a href="#" data-value="pending">Pendente</a>
-                            <a href="#" data-value="canceled">Cancelado</a>
+                            <a href="#" data-value="confirmado">Confirmado</a>
+                            <a href="#" data-value="pendente">Pendente</a>
+                            <a href="#" data-value="cancelado">Cancelado</a>
                         </div>
                     </div>
                     <button id="new-appointment-btn" class="new-appointment-btn"><i class="fas fa-plus"></i> Novo Agendamento</button>
@@ -180,6 +180,17 @@ try {
                 </div>
                 <button type="submit" class="btn-submit">Salvar Agendamento</button>
             </form>
+        </div>
+    </div>
+
+    <div id="day-details-modal" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h2 id="day-details-title">Agendamentos do dia</h2>
+                <button id="close-day-details-btn" class="close-modal-btn"><i class="fas fa-times"></i></button>
+            </header>
+            <div id="day-details-list" class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                </div>
         </div>
     </div>
 
