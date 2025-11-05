@@ -18,12 +18,34 @@ try {
 
         $pdo->beginTransaction();
 
-        // 3. Atualizar o status do agendamento para 'confirmado'
-        $stmtAg = $pdo->prepare("UPDATE agendamento SET status = 'confirmado' WHERE id_agendamento = :id");
-        $stmtAg->execute(['id' => $id_agendamento]);
+        // --- INÍCIO DA CORREÇÃO DE SEGURANÇA (IDOR) ---
 
-        // 4. CORREÇÃO: Atualizar o status do pagamento para 'aprovado'
-        // (A tabela 'pagamento' usa 'aprovado', não 'confirmado')
+        // 3. Montar a query de agendamento base
+        $sqlAg = "UPDATE agendamento SET status = 'confirmado' WHERE id_agendamento = :id_agendamento";
+        
+        // Prepara os parâmetros
+        $params = [':id_agendamento' => $id_agendamento];
+
+        // 4. Se o usuário NÃO for 'admin', ele DEVE ser 'barbeiro' (verificado no passo 1)
+        // Então, adicionamos a verificação de propriedade
+        if ($_SESSION['usuario_tipo'] === 'barbeiro') {
+            $sqlAg .= " AND id_barbeiro = :id_barbeiro_logado";
+            $params[':id_barbeiro_logado'] = $_SESSION['usuario_id'];
+        }
+
+        // 5. Executar a atualização do agendamento
+        $stmtAg = $pdo->prepare($sqlAg);
+        $stmtAg->execute($params);
+        
+        // 6. VERIFICAR se alguma linha foi realmente atualizada
+        // Se for 0, ou o ID não existe, ou o barbeiro não tinha permissão
+        if ($stmtAg->rowCount() === 0) {
+            throw new Exception("Agendamento não encontrado ou você não tem permissão para modificá-lo.");
+        }
+        
+        // --- FIM DA CORREÇÃO DE SEGURANÇA ---
+
+        // 7. Se o passo 6 passou, atualiza o pagamento (lógica original)
         $stmtPg = $pdo->prepare("UPDATE pagamento SET status = 'aprovado' WHERE id_agendamento = :id");
         $stmtPg->execute(['id' => $id_agendamento]);
         
@@ -37,6 +59,7 @@ try {
     $response['mensagem'] = "Erro de Banco de Dados: " . $e->getMessage();
 } catch (Exception $e) {
     $pdo->rollBack();
+    // A mensagem de erro da nossa exceção (passo 6) será capturada aqui
     $response['mensagem'] = "Erro: " . $e->getMessage();
 }
 

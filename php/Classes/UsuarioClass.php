@@ -7,7 +7,7 @@ class Usuario {
     }
 
     public function buscarPorId($id_usuario) {
-        $sql = "SELECT id_usuario, email, tipo FROM usuario WHERE id_usuario = :id_usuario";
+        $sql = "SELECT id_usuario, email, tipo, nome FROM usuarios WHERE id_usuario = :id_usuario";
         $cmd = $this->pdo->prepare($sql);
         $cmd->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
         $cmd->execute();

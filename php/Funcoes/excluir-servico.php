@@ -2,8 +2,20 @@
 // Define o tipo de conteúdo (bom para o fetch)
 header('Content-Type: application/json');
 
-// --- CORREÇÃO DOS CAMINHOS ---
-require_once '../conexao.php'; // Estava: ../Classes/Conexao.php
+// --- INÍCIO DA CORREÇÃO DE SEGURANÇA ---
+require_once '../session-manager.php';
+
+// Verifica se o usuário está logado e é admin ou barbeiro
+if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_tipo'] !== 'admin' && $_SESSION['usuario_tipo'] !== 'barbeiro')) {
+    $response = ['sucesso' => false, 'mensagem' => 'Acesso não autorizado.'];
+    echo json_encode($response);
+    exit();
+}
+// --- FIM DA CORREÇÃO DE SEGURANÇA ---
+
+
+// Includes
+require_once '../conexao.php';
 require_once '../Classes/ServicosClass.php';
 
 $response = ['sucesso' => false, 'mensagem' => 'Método de requisição inválido ou ID não fornecido.'];

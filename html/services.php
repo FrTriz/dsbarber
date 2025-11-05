@@ -45,9 +45,12 @@ $usuarioLogadoTipo = $_SESSION['usuario_tipo']; // Pega o TIPO (admin ou barbeir
             
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="admin.php"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
-                    <li><a href="services.php" class="active"><i class="fas fa-concierge-bell"></i> Serviços</a></li>
+                    <li><a href="admin.php" class="active"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
+                    <li><a href="services.php"><i class="fas fa-concierge-bell"></i> Serviços</a></li>
                     <li><a href="barbers.php"><i class="fas fa-cut"></i> Barbeiros</a></li>
+                    
+                    <li><a href="horarios.php"><i class="fas fa-clock"></i> Horários</a></li>
+
                     <li><a href="reports.php"><i class="fas fa-chart-line"></i> Relatórios</a></li>
                 </ul>
             </nav>
@@ -56,7 +59,7 @@ $usuarioLogadoTipo = $_SESSION['usuario_tipo']; // Pega o TIPO (admin ou barbeir
                 <div class="user-details">
                     <span class="user-name"><?php echo htmlspecialchars($usuarioLogadoNome); ?></span>
                 </div>
-                <a href="../php/Funcoes/logout.php" class="logout-icon" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
+                <a href="../php/Funcoes/logout-login.php" class="logout-icon" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </aside>
         <div id="overlay" class="overlay"></div>

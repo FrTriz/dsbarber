@@ -2,7 +2,19 @@
 // Define o tipo de conteúdo como JSON
 header('Content-Type: application/json');
 
-// --- CORREÇÃO DOS CAMINHOS ---
+// --- INÍCIO DA CORREÇÃO DE SEGURANÇA ---
+require_once '../session-manager.php';
+
+// Verifica se o usuário está logado e é admin ou barbeiro
+if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_tipo'] !== 'admin' && $_SESSION['usuario_tipo'] !== 'barbeiro')) {
+    $response = ['sucesso' => false, 'mensagem' => 'Acesso não autorizado.'];
+    echo json_encode($response);
+    exit();
+}
+// --- FIM DA CORREÇÃO DE SEGURANÇA ---
+
+
+// Includes
 require_once '../conexao.php';
 require_once '../Classes/ServicosClass.php';
 
@@ -29,10 +41,10 @@ try {
     }
 } catch (PDOException $e) {
     // Erro de banco de dados
-    $response = ['sucesso' => false, 'mensagem' => 'Erro de Banco de Dados: ' . $e.getMessage()];
+    $response = ['sucesso' => false, 'mensagem' => 'Erro de Banco de Dados: ' . $e->getMessage()];
 } catch (Exception $e) {
     // Outros erros
-    $response = ['sucesso' => false, 'mensagem' => 'Erro: ' . $e.getMessage()];
+    $response = ['sucesso' => false, 'mensagem' => 'Erro: ' . $e->getMessage()];
 }
 
 // Envia a resposta como JSON

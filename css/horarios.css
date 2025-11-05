@@ -1,0 +1,112 @@
+/* css/horarios.css */
+
+.horarios-container {
+    background-color: #1F2924;
+    border: 1px solid #2a342f;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.horarios-header {
+    margin-bottom: 2rem;
+}
+
+.horarios-header .form-group {
+    max-width: 400px;
+}
+
+.horarios-form {
+    display: none; /* Começa escondido */
+}
+
+.horarios-form.visible {
+    display: block;
+}
+
+.day-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #2a342f;
+}
+
+.day-row:last-of-type {
+    border-bottom: none;
+}
+
+.day-label {
+    display: flex;
+    flex-direction: column;
+}
+
+.day-label strong {
+    font-size: 1.1rem;
+    color: #f0f0f0;
+}
+
+.day-label .toggle-trabalha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-top: 8px;
+    cursor: pointer;
+}
+
+/* Checkbox customizado */
+.toggle-trabalha input {
+    display: none;
+}
+.toggle-trabalha .slider {
+    width: 34px;
+    height: 18px;
+    background-color: #3a443f;
+    border-radius: 9px;
+    position: relative;
+    transition: background-color 0.2s;
+}
+.toggle-trabalha .slider::before {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+}
+.toggle-trabalha input:checked + .slider {
+    background-color: #2EB67D;
+}
+.toggle-trabalha input:checked + .slider::before {
+    transform: translateX(16px);
+}
+
+
+.day-inputs {
+    display: contents; /* Faz os inputs se alinharem ao grid pai */
+}
+
+.day-row.disabled .day-label strong {
+    color: #666;
+}
+.day-row.disabled .day-label span {
+    color: #666;
+}
+
+.day-row.disabled .form-group input {
+    background-color: #2a342f;
+    border-color: #2a342f;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 2rem;
+    color: #aaa;
+}
