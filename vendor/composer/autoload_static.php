@@ -6,63 +6,67 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit0393830ad13082bb726d7f225d4a3f36
 {
+    public static $files = array (
+        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Php80\\' => 23,
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Ctype\\' => 23,
+        ),
         'P' => 
         array (
-            'Psr\\Cache\\' => 10,
+            'PhpOption\\' => 10,
         ),
-        'M' => 
+        'G' => 
         array (
-            'MercadoPago\\' => 12,
+            'GrahamCampbell\\ResultType\\' => 26,
         ),
         'D' => 
         array (
-            'Doctrine\\Persistence\\' => 21,
-            'Doctrine\\Deprecations\\' => 22,
-            'Doctrine\\Common\\Lexer\\' => 22,
-            'Doctrine\\Common\\Annotations\\' => 28,
-            'Doctrine\\Common\\' => 16,
+            'Dotenv\\' => 7,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Psr\\Cache\\' => 
+        'Symfony\\Polyfill\\Php80\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/cache/src',
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
-        'MercadoPago\\' => 
+        'Symfony\\Polyfill\\Mbstring\\' => 
         array (
-            0 => __DIR__ . '/..' . '/mercadopago/dx-php/src/MercadoPago',
-            1 => __DIR__ . '/..' . '/mercadopago/dx-php/tests',
-            2 => __DIR__ . '/..' . '/mercadopago/dx-php/src/MercadoPago/Generic',
-            3 => __DIR__ . '/..' . '/mercadopago/dx-php/src/MercadoPago/Entities',
-            4 => __DIR__ . '/..' . '/mercadopago/dx-php/src/MercadoPago/Entities/Shared',
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
-        'Doctrine\\Persistence\\' => 
+        'Symfony\\Polyfill\\Ctype\\' => 
         array (
-            0 => __DIR__ . '/..' . '/doctrine/persistence/src/Persistence',
+            0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
-        'Doctrine\\Deprecations\\' => 
+        'PhpOption\\' => 
         array (
-            0 => __DIR__ . '/..' . '/doctrine/deprecations/src',
+            0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
         ),
-        'Doctrine\\Common\\Lexer\\' => 
+        'GrahamCampbell\\ResultType\\' => 
         array (
-            0 => __DIR__ . '/..' . '/doctrine/lexer/src',
+            0 => __DIR__ . '/..' . '/graham-campbell/result-type/src',
         ),
-        'Doctrine\\Common\\Annotations\\' => 
+        'Dotenv\\' => 
         array (
-            0 => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations',
-        ),
-        'Doctrine\\Common\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/common/src',
-            1 => __DIR__ . '/..' . '/doctrine/event-manager/src',
+            0 => __DIR__ . '/..' . '/vlucas/phpdotenv/src',
         ),
     );
 
     public static $classMap = array (
+        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
+        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

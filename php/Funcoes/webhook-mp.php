@@ -1,6 +1,7 @@
 <?php
-require_once '../../vendor/autoload.php';
-require_once '../conexao.php';
+// Inclua o conexao.php PRIMEIRO para carregar o .env
+require_once '../conexao.php'; 
+require_once '../../vendor/autoload.php'; // Mantenha se o conexao.php não o carregar
 require_once '../session-manager.php';
 
 // CRUCIAL: Log para depuração
@@ -14,7 +15,7 @@ try {
     $log_message .= "Dados recebidos: " . $json_data . "\n";
 
     // USE O MESMO TOKEN DE TESTE
-    $accessToken = "xxxxxxxxxxxxxxxxxxxxxxxxxx"; 
+    $accessToken = $_ENV['MP_ACCESS_TOKEN'];
     MercadoPago\SDK::setAccessToken($accessToken);
 
     // Verifica se é uma notificação de pagamento
