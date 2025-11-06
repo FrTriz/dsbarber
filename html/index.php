@@ -10,6 +10,10 @@ require_once '../php/session-manager.php';
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="../manifest.json">
+
+    <link rel="apple-touch-icon" href="../Ds_Barber_Logo.png">
 </head>
 <body>
     <header>
@@ -54,14 +58,12 @@ require_once '../php/session-manager.php';
                     <p>Um corte de cabelo atemporal e de precisão, adaptado às suas preferências.</p>
                 </div>
                 <div class="card">
-                    <i class="fas fa-fire"></i>
-                    <h3>Barba & Toalha Quente</h3>
-                    <p>Um luxuoso barbear com toalha quente e aparo de barba para a melhor experiência de cuidado.</p>
+                    <i class="fas fa-star"></i> <h3>Barba</h3>
+                    <p>Um barbear preciso e modelagem de barba para um visual impecável.</p>
                 </div>
                 <div class="card">
-                    <i class="fas fa-spa"></i>
-                    <h3>Tratamento Capilar</h3>
-                    <p>Revitalize seu cabelo com nossos tratamentos nutritivos e fortalecedores.</p>
+                    <i class="fas fa-paint-brush"></i> <h3>Tintura de Cabelo</h3>
+                    <p>Mude seu visual com nossas opções de coloração profissionais.</p>
                 </div>
             </div>
         </section>
@@ -122,16 +124,16 @@ require_once '../php/session-manager.php';
                 <ul>
                     <li><a href="#">Corte de Cabelo</a></li>
                     <li><a href="#">Design de Barba</a></li>
-                    <li><a href="#">Tratamento Capilar</a></li>
-                    <li><a href="#">Toalha Quente</a></li>
+                    <li><a href="#">Tintura de Cabelo</a></li>
+                    <li><a href="#">Barba</a></li>
                 </ul>
             </div>
             <div class="footer-section">
                 <h3>Contato</h3>
                 <ul>
-                    <li><i class="fas fa-map-marker-alt"></i> Av. do Estilo, 123, Lisboa</li>
+                    <li><i class="fas fa-map-marker-alt"></i> R. Duque de Caxias, 61 - Centro</li>
                     <li><i class="fas fa-envelope"></i> contato@dsbarber.com</li>
-                    <li><i class="fas fa-phone"></i> +351 123 456 789</li>
+                    <li><i class="fas fa-phone"></i> (71) 99288-6449</li>
                 </ul>
             </div>
             <div class="footer-section">

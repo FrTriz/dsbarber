@@ -33,15 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Formatar dados
         const statusClasse = traduzirStatusParaClasse(apt.status_agendamento);
         const statusTexto = apt.status_agendamento.charAt(0).toUpperCase() + apt.status_agendamento.slice(1);
-        const precoFormatado = parseFloat(apt.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        
+        // USA O valor_a_pagar (que pode ser metade)
+        const precoFormatado = parseFloat(apt.valor_a_pagar).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-        // 2. Lógica de Ação (Botões)
+        // 2. Lógica de Ação (Botões) - MODIFICADO
         let acaoButtonsHtml = '';
         if (statusClasse === 'pending') {
-            // Adiciona ambos os botões "Pagar" e "Cancelar"
+            // Adiciona data-attributes ao botão Pagar
             acaoButtonsHtml = `
                 <div class="acao-buttons">
-                    <a href="#" class="btn-pagar" data-id="${apt.id_agendamento}">Pagar Agora</a>
+                    <a href="#" class="btn-pagar" 
+                       data-id-pagamento="${apt.id_pagamento}" 
+                       data-valor="${apt.valor_a_pagar}">
+                       Pagar Agora
+                    </a>
                     <button class="btn-cancelar" data-id="${apt.id_agendamento}">Cancelar</button>
                 </div>
             `;
@@ -110,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * (NOVO) Lida com o clique no botão de cancelar
+     * Lida com o clique no botão de cancelar
      */
     async function handleCancelamento(idAgendamento, buttonElement) {
         // Pede confirmação ao usuário
@@ -125,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData();
             formData.append('id_agendamento', idAgendamento);
 
+            // USA O SCRIPT DE CANCELAMENTO QUE VOCÊ JÁ TINHA
             const response = await fetch('../php/Funcoes/cancelar-agendamento-cliente.php', {
                 method: 'POST',
                 body: formData
@@ -162,22 +169,89 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Listener de eventos (modificado para incluir o .btn-cancelar)
+    // --- (NOVO) LÓGICA DO MODAL DE PAGAMENTO ---
+    const pixModal = document.getElementById('pix-modal');
+    const closePixModalBtn = document.getElementById('close-pix-modal-btn');
+    const pixLoadingModal = document.getElementById('pix-loading-modal');
+    const pixContainerModal = document.getElementById('pix-container-modal');
+    const qrCodeImgModal = document.getElementById('pix-qr-code-img-modal');
+    const copiaColaTextoModal = document.getElementById('pix-copia-cola-texto-modal');
+    const btnCopiarPixModal = document.getElementById('btn-copiar-pix-modal');
+
+    const openPixModal = () => {
+        // Reseta o modal para o estado "carregando"
+        pixLoadingModal.style.display = 'block';
+        pixContainerModal.style.display = 'none';
+        pixLoadingModal.innerHTML = '<p class="loading">Gerando seu PIX, aguarde...</p>'; // Garante que não mostre erro
+        pixModal.classList.add('show');
+    };
+    const closePixModal = () => pixModal.classList.remove('show');
+
+    // Fechar o modal
+    if(closePixModalBtn) closePixModalBtn.addEventListener('click', closePixModal);
+    if(pixModal) pixModal.addEventListener('click', (e) => {
+        if (e.target === pixModal) closePixModal();
+    });
+
+    /**
+     * (NOVO) Chama o gerar-pix-mp.php e preenche o modal
+     */
+    async function handleGerarPix(idPagamento, valorPagar) {
+        openPixModal();
+
+        try {
+            const dadosPagamento = {
+                id_pagamento: idPagamento,
+                valor_a_pagar: parseFloat(valorPagar)
+            };
+
+            // USA O MESMO SCRIPT 'gerar-pix-mp.php' DA PÁGINA DE AGENDAMENTO
+            const response = await fetch('../php/Funcoes/gerar-pix-mp.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosPagamento)
+            });
+
+            const pixData = await response.json();
+            if (!response.ok || !pixData.sucesso) {
+                throw new Error(pixData.mensagem || "Não foi possível gerar o PIX.");
+            }
+
+            // SUCESSO! Exibe o PIX
+            qrCodeImgModal.src = "data:image/png;base64," + pixData.qr_code_base64;
+            copiaColaTextoModal.textContent = pixData.qr_code_copy_paste;
+            
+            btnCopiarPixModal.onclick = () => { // Adiciona evento ao botão copiar
+                navigator.clipboard.writeText(pixData.qr_code_copy_paste);
+                alert('Código PIX copiado!');
+            };
+
+            // Troca a view de "Carregando" para "PIX"
+            pixLoadingModal.style.display = 'none';
+            pixContainerModal.style.display = 'block';
+
+        } catch (error) {
+            console.error('Erro ao gerar PIX:', error);
+            pixLoadingModal.innerHTML = `<p class="error-message">Falha ao gerar PIX: ${error.message}</p>`;
+        }
+    }
+
+    // Listener de eventos (modificado para incluir o .btn-pagar)
     listaAgendamentosContainer.addEventListener('click', (e) => {
         const payButton = e.target.closest('.btn-pagar');
         const cancelButton = e.target.closest('.btn-cancelar');
 
         if (payButton) {
             e.preventDefault();
-            const id = payButton.dataset.id;
-            alert(`Implementação futura: Abrir modal de pagamento para o agendamento #${id}`);
-            // Aqui você chamaria a lógica para gerar o PIX/Pagamento
+            const idPagamento = payButton.dataset.idPagamento;
+            const valor = payButton.dataset.valor;
+            handleGerarPix(idPagamento, valor); // Chama a nova função
         }
         
         if (cancelButton) {
             e.preventDefault();
             const id = cancelButton.dataset.id;
-            handleCancelamento(id, cancelButton); // Chama a nova função
+            handleCancelamento(id, cancelButton);
         }
     });
 

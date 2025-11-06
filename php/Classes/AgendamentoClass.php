@@ -40,8 +40,10 @@ class Agendamento {
         }
 
         try {
-            // 1. Iniciar a Transação
-            $this->pdo->beginTransaction();
+            // --- INÍCIO DA CORREÇÃO ---
+            // 1. REMOVEMOS o $this->pdo->beginTransaction(); daqui.
+            // A transação agora é controlada pelo 'criar-agendamento.php'.
+            // --- FIM DA CORREÇÃO ---
 
             // 2. Inserir na tabela principal 'agendamento'
             $sqlAgendamento = "INSERT INTO agendamento (id_cliente, id_barbeiro, data_hora_inicio, data_hora_fim, status) 
@@ -68,16 +70,20 @@ class Agendamento {
                     ':id_servico' => $idServico
                 ]);
             }
-
-            // 5. Se tudo deu certo, comitar a transação
-            $this->pdo->commit();
+            
+            // --- INÍCIO DA CORREÇÃO ---
+            // 5. REMOVEMOS o $this->pdo->commit(); daqui.
+            // --- FIM DA CORREÇÃO ---
 
             // 6. Retornar o ID do novo agendamento
             return $idAgendamento;
 
         } catch (Exception $e) {
-            // 7. Se algo deu errado, reverter tudo
-            $this->pdo->rollBack();
+            // --- INÍCIO DA CORREÇÃO ---
+            // 7. REMOVEMOS o $this->pdo->rollBack(); daqui.
+            // O 'catch' do 'criar-agendamento.php' fará o rollback.
+            // --- FIM DA CORREÇÃO ---
+            
             // Propaga o erro para ser pego pelo 'catch' do script principal
             throw new Exception("Erro ao salvar agendamento no banco: " . $e->getMessage());
         }

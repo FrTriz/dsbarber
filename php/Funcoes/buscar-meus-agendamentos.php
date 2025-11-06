@@ -14,21 +14,26 @@ try {
     
     $id_cliente = $_SESSION['usuario_id'];
 
-    // 2. Montar a Query SQL (usando a mesma VIEW do admin)
-    // Buscamos os campos que o front-end precisa
+    // 2. Montar a Query SQL (MODIFICADA para buscar dados do pagamento)
+    //    (Usamos joins explícitos para garantir que pegamos os dados do pagamento)
     $sql = "SELECT 
-                id_agendamento, 
-                DATE_FORMAT(data_hora_inicio, '%d/%m/%Y') as data_fmt, 
-                DATE_FORMAT(data_hora_inicio, '%H:%i') as hora_fmt, 
-                servicos_agendados, 
-                status_agendamento,
-                valor_total
+                a.id_agendamento, 
+                DATE_FORMAT(a.data_hora_inicio, '%d/%m/%Y') as data_fmt, 
+                DATE_FORMAT(a.data_hora_inicio, '%H:%i') as hora_fmt, 
+                vw.servicos_agendados, 
+                a.status as status_agendamento,
+                p.valor as valor_a_pagar,
+                p.id_pagamento
             FROM 
-                vw_agendamentos_completos
+                agendamento a
+            JOIN 
+                vw_agendamentos_completos vw ON a.id_agendamento = vw.id_agendamento
+            JOIN 
+                pagamento p ON a.id_agendamento = p.id_agendamento
             WHERE 
-                id_cliente = :id_cliente
+                a.id_cliente = :id_cliente
             ORDER BY 
-                data_hora_inicio DESC"; // Mais recentes primeiro
+                a.data_hora_inicio DESC"; // Mais recentes primeiro
     
     // 3. Executar e retornar
     $stmt = $pdo->prepare($sql);

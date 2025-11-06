@@ -157,6 +157,97 @@
     padding: 40px;
 }
 
+/* --- Estilos do Modal de Pagamento PIX --- */
+.modal-pix {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1002;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.modal-pix.show {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-pix-content {
+    background-color: #1F2924;
+    padding: 32px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px; /* Um pouco menor para pop-ups */
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+.modal-pix.show .modal-pix-content {
+    transform: scale(1);
+}
+.modal-pix-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.modal-pix-header h2 {
+    margin: 0;
+}
+.close-pix-modal-btn {
+    background: none;
+    border: none;
+    color: #f0f0f0;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Estilos do QR Code e Copia/Cola */
+.pix-instructions {
+    color: #ccc;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.pix-details {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+#pix-qr-code-img-modal {
+    max-width: 220px; /* Tamanho bom para modal */
+    width: 100%;
+    height: auto;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+.pix-code {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-dark-green);
+    padding: 15px;
+    border-radius: 5px;
+    gap: 15px;
+}
+#pix-copia-cola-texto-modal {
+    flex: 1; /* Permite quebrar linha */
+    overflow-wrap: break-word;
+    word-break: break-all;
+    font-size: 0.9rem;
+}
+#btn-copiar-pix-modal {
+    flex-shrink: 0; /* Não encolhe o botão */
+    background: none;
+    border: none;
+    color: var(--accent-green);
+    cursor: pointer;
+}
+
 /* --- Media Query para o corpo de "Meus Agendamentos" --- */
 @media (max-width: 600px) {
     .container-meus-agendamentos {
@@ -191,5 +282,39 @@
         /* Aumenta a largura dos botões/badge no celular */
         width: 100%; 
         max-width: 250px; /* Limite */
+    }
+}
+
+/* --- (NOVO) Media Query para Telas Pequenas --- */
+@media (max-width: 480px) {
+    .modal-pix-content {
+        /* Reduz o padding interno em telas pequenas */
+        padding: 24px 16px;
+    }
+
+    #pix-qr-code-img-modal {
+        /* Reduz o tamanho máximo do QR code */
+        max-width: 180px; 
+    }
+
+    .pix-code {
+        /* Reduz o espaçamento e o padding */
+        gap: 10px;
+        padding: 12px;
+    }
+
+    #pix-copia-cola-texto-modal {
+        /* Reduz a fonte do "copia e cola" */
+        font-size: 0.8rem;
+    }
+
+    .modal-pix-header h2 {
+        /* Reduz o título "Efetuar Pagamento" */
+        font-size: 1.25rem;
+    }
+
+    .pix-instructions {
+        /* Reduz o texto de instrução */
+        font-size: 0.9rem;
     }
 }

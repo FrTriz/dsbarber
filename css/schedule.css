@@ -359,6 +359,11 @@
     background: white; 
     padding: 10px; 
     border-radius: 5px;
+
+    /* --- ESTAS SÃO AS LINHAS DE CORREÇÃO --- */
+    max-width: 200px;  /* Define um tamanho máximo (você pode ajustar para 180px, 220px, etc.) */
+    width: 100%;       /* Garante que ele se ajuste em telas menores */
+    height: auto;      /* Mantém a proporção correta */
 }
 
 .pix-code {
@@ -460,6 +465,99 @@
     cursor: not-allowed;
 }
 
+/* --- (SUBSTITUIÇÃO FINAL v2) Estilos dos Modais (Pop-ups) --- */
+
+/* O "fundo" escuro */
+.modal-pix {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1002;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s 0.3s linear;
+}
+.modal-pix.show {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+}
+
+/* O "card" do pop-up */
+.modal-pix-content {
+    background-color: var(--bg-card-green);
+    border: 1px solid #2a342f;
+    color: var(--text-light);
+    padding: 32px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.modal-pix.show .modal-pix-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Cabeçalho do Modal */
+.modal-pix-header {
+    display: flex;
+    justify-content: center; /* Centraliza o título */
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #2a342f;
+}
+.modal-pix-header h2 {
+    margin: 0;
+    color: var(--text-light);
+}
+
+/* Corpo do Modal (Onde está o ícone) */
+.modal-body {
+    text-align: center; /* Centraliza o ícone e os textos */
+}
+
+/* Ícone de Check (O mais importante) */
+.modal-body .fa-check-circle {
+    color: var(--accent-green); /* Cor verde */
+    font-size: 50px;
+    margin-bottom: 20px;
+}
+
+/* Texto do corpo do modal */
+.modal-body p {
+    margin: 10px 0;
+    color: var(--text-dark); /* Cor cinza-claro */
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Botão de fechar (X) - (Para o modal de Meus Agendamentos) */
+.close-pix-modal-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.close-pix-modal-btn:hover {
+    color: var(--text-light);
+}
+
 /* Responsive Styles */
 @media (max-width: 992px) {
     .schedule-container {
@@ -499,4 +597,37 @@
         justify-content: space-between;
         padding: 0;
     }
+}
+
+
+/* --- (NOVO) Estilos para Dias e Horários Desabilitados --- */
+
+/* Dia desabilitado (passado ou dia de folga) */
+.days div.disabled {
+    background-color: transparent !important; /* Remove o hover */
+    color: #555 !important; /* Cor cinza escura */
+    cursor: not-allowed;
+    text-decoration: line-through; /* Tacha o dia */
+    opacity: 0.7;
+}
+
+/* Garante que o dia selecionado (se bugado) não fique verde */
+.days div.disabled.selected {
+    background-color: transparent !important;
+    color: #555 !important;
+}
+
+/* Horário desabilitado (ocupado, pausa, etc.) */
+.time-slot.disabled {
+    background-color: transparent !important;
+    border-color: #444 !important;
+    color: #555 !important;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* Remove o efeito hover do horário desabilitado */
+.time-slot.disabled:hover {
+    background-color: transparent !important;
+    border-color: #444 !important;
 }

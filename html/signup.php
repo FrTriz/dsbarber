@@ -40,7 +40,7 @@
 
                     <button type="submit" class="login-btn">Cadastrar</button>
                 </form>
-                <p class="signup-link">Já tem uma conta? <a href="login.html">Entre aqui</a></p>
+                <p class="signup-link">Já tem uma conta? <a href="login.php">Entre aqui</a></p>
             </div>
         </div>
         <div class="left-panel">

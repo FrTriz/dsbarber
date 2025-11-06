@@ -47,6 +47,32 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') 
             </div>
         </div>
     </main>
+    
+    <div id="pix-modal" class="modal-pix">
+        <div class="modal-pix-content">
+            <header class="modal-pix-header">
+                <h2>Efetuar Pagamento</h2>
+                <button id="close-pix-modal-btn" class="close-pix-modal-btn"><i class="fas fa-times"></i></button>
+            </header>
+            
+            <div class="pix-info">
+                <div id="pix-loading-modal" style="text-align: center; padding: 40px 0;">
+                    <p class="loading">Gerando seu PIX, aguarde...</p>
+                </div>
+
+                <div id="pix-container-modal" style="display: none;">
+                    <p class="pix-instructions">Escaneie o QR code com o aplicativo do seu banco ou copie o código abaixo para completar o pagamento.</p>
+                    <div class="pix-details">
+                        <img src="" alt="QR Code PIX" id="pix-qr-code-img-modal">
+                    </div>
+                    <div class="pix-code">
+                        <span id="pix-copia-cola-texto-modal"></span>
+                        <button type"button" id="btn-copiar-pix-modal">Copiar Código</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/meus-agendamentos.js"></script>
 </body>
