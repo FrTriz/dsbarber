@@ -1,8 +1,7 @@
 <?php
-// Inclua o conexao.php PRIMEIRO para carregar o .env
+// Inclua o conexao.php PRIMEIRO
 require_once '../conexao.php'; 
-require_once '../../vendor/autoload.php'; // Mantenha se o conexao.php não o carregar
-require_once '../session-manager.php';
+require_once '../../vendor/autoload.php'; 
 
 // CRUCIAL: Log para depuração
 $log_file = 'webhook_log.txt';
@@ -14,56 +13,83 @@ try {
     
     $log_message .= "Dados recebidos: " . $json_data . "\n";
 
-    // USE O MESMO TOKEN DE TESTE
-    $accessToken = $_ENV['MP_ACCESS_TOKEN'];
+
+    $accessToken = "xxxxxxxxxxxxxxxxxxx"; 
+
     MercadoPago\SDK::setAccessToken($accessToken);
 
-    // Verifica se é uma notificação de pagamento
+    $payment_id_mp = null;
+
+    // Tenta obter o ID do pagamento de qualquer um dos formatos
     if (isset($data['type']) && $data['type'] === 'payment') {
-        
         $payment_id_mp = $data['data']['id'];
+    } elseif (isset($data['topic']) && $data['topic'] === 'payment') {
+        $payment_id_mp = $data['resource'];
+    }
+
+    // Se encontramos um ID de pagamento, continuamos
+    if ($payment_id_mp) {
         
-        // Busca o pagamento na API do MP para segurança
         $payment = MercadoPago\Payment::find_by_id($payment_id_mp);
 
         if ($payment === null) {
             throw new Exception("Pagamento $payment_id_mp não encontrado na API do MP.");
         }
 
-        // Verifica se foi APROVADO e se tem a nossa Referência
-        if ($payment->status === 'approved' && !empty($payment->external_reference)) {
-            
-            $id_pagamento_interno = $payment->external_reference;
-            
-            // Busca o 'id_agendamento'
-            $stmt_get_ag_id = $pdo->prepare("SELECT id_agendamento FROM pagamento WHERE id_pagamento = ?");
-            $stmt_get_ag_id->execute([$id_pagamento_interno]);
-            $agendamento_info = $stmt_get_ag_id->fetch(PDO::FETCH_ASSOC);
-
-            if (!$agendamento_info) {
-                 throw new Exception("Pagamento interno $id_pagamento_interno não encontrado no banco.");
-            }
-            
-            $id_agendamento = $agendamento_info['id_agendamento'];
-
-            // ATUALIZA O BANCO (lógica do confirmar-agendamento.php)
-            $pdo->beginTransaction();
-            
-            $stmtAg = $pdo->prepare("UPDATE agendamento SET status = 'confirmado' WHERE id_agendamento = ? AND status = 'pendente'");
-            $stmtAg->execute([$id_agendamento]);
-
-            $stmtPg = $pdo->prepare("UPDATE pagamento SET status = 'aprovado' WHERE id_pagamento = ? AND status = 'pendente'");
-            $stmtPg->execute([$id_pagamento_interno]);
-            
-            $pdo->commit();
-            
-            $log_message .= "SUCESSO: Agendamento $id_agendamento confirmado.\n";
-
-        } else {
-            $log_message .= "Status não 'approved' (Status: $payment->status).\n";
+        if (empty($payment->external_reference)) {
+            throw new Exception("Pagamento não possui referência interna (external_reference).");
         }
+            
+        $id_pagamento_interno = $payment->external_reference;
+        
+        // Busca o 'id_agendamento'
+        $stmt_get_ag_id = $pdo->prepare("SELECT id_agendamento FROM pagamento WHERE id_pagamento = ?");
+        $stmt_get_ag_id->execute([$id_pagamento_interno]);
+        $agendamento_info = $stmt_get_ag_id->fetch(PDO::FETCH_ASSOC);
+
+        if (!$agendamento_info) {
+             throw new Exception("Pagamento interno $id_pagamento_interno não encontrado no banco.");
+        }
+        
+        $id_agendamento = $agendamento_info['id_agendamento'];
+
+        // --- (LÓGICA DE STATUS MELHORADA) ---
+        $pdo->beginTransaction();
+        
+        switch ($payment->status) {
+            case 'approved':
+                // CLIENTE PAGOU: Confirma o agendamento
+                $stmtAg = $pdo->prepare("UPDATE agendamento SET status = 'confirmado' WHERE id_agendamento = ? AND status = 'pendente'");
+                $stmtAg->execute([$id_agendamento]);
+
+                $stmtPg = $pdo->prepare("UPDATE pagamento SET status = 'aprovado' WHERE id_pagamento = ? AND status = 'pendente'");
+                $stmtPg->execute([$id_pagamento_interno]);
+                
+                $log_message .= "SUCESSO: Agendamento $id_agendamento confirmado.\n";
+                break;
+                
+            case 'cancelled':
+            case 'expired':
+                // CLIENTE NÃO PAGOU (ou o PIX expirou): Cancela o agendamento
+                $stmtAg = $pdo->prepare("UPDATE agendamento SET status = 'cancelado' WHERE id_agendamento = ? AND status = 'pendente'");
+                $stmtAg->execute([$id_agendamento]);
+
+                $stmtPg = $pdo->prepare("UPDATE pagamento SET status = 'cancelado' WHERE id_pagamento = ? AND status = 'pendente'");
+                $stmtPg->execute([$id_pagamento_interno]);
+                
+                $log_message .= "EXPIRADO/CANCELADO: Agendamento $id_agendamento cancelado (PIX não pago).\n";
+                break;
+                
+            default:
+                // Outros status (ex: 'pending', 'in_process')
+                $log_message .= "Status ignorado: $payment->status.\n";
+                break;
+        }
+        
+        $pdo->commit();
+
     } else {
-        $log_message .= "Notificação não é 'payment'.\n";
+        $log_message .= "Notificação de tipo desconhecido.\n";
     }
 
 } catch (Exception $e) {
