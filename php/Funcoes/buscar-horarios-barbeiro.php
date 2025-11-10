@@ -4,50 +4,37 @@ header('Content-Type: application/json');
 require_once '../session-manager.php';
 require_once '../conexao.php';
 
-// Resposta padrão
-$response = ['sucesso' => false, 'horarios' => []];
+// Segurança: Apenas admin ou o próprio barbeiro podem ver os horários
+if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_tipo'] !== 'admin' && $_SESSION['usuario_tipo'] !== 'barbeiro')) {
+    echo json_encode(['erro' => 'Acesso não autorizado.']);
+    exit();
+}
+
+if (!isset($_GET['id_barbeiro'])) {
+    echo json_encode(['erro' => 'ID do barbeiro não fornecido.']);
+    exit();
+}
+
+$id_barbeiro = (int)$_GET['id_barbeiro'];
+
+// Segurança Adicional: Se for um barbeiro, ele só pode ver os próprios horários
+if ($_SESSION['usuario_tipo'] === 'barbeiro' && $id_barbeiro !== (int)$_SESSION['usuario_id']) {
+     echo json_encode(['erro' => 'Você não tem permissão para ver os horários de outro profissional.']);
+    exit();
+}
 
 try {
-// 1. (Passo 2.1) Segurança de Nível de Acesso
-if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_tipo'] !== 'admin' && $_SESSION['usuario_tipo'] !== 'barbeiro')) {
-throw new Exception('Acesso não autorizado.');
-}
+    $stmt = $pdo->prepare(
+        "SELECT dia_semana, hora_inicio, hora_fim, inicio_pausa, fim_pausa 
+         FROM horarios_trabalho 
+         WHERE id_barbeiro = :id_barbeiro"
+    );
+    $stmt->execute(['id_barbeiro' => $id_barbeiro]);
+    $horarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $id_barbeiro_logado = (int)$_SESSION['usuario_id'];
-    $tipo_usuario_logado = $_SESSION['usuario_tipo'];
-    $id_barbeiro_alvo;
-
-    // 2. (Passo 3 - Otimizado) Lógica de ID de Barbeiro
-    // Se for 'barbeiro', FORÇAMOS o ID da sessão e ignoramos o GET.
-    if ($tipo_usuario_logado === 'barbeiro') {
-        $id_barbeiro_alvo = $id_barbeiro_logado;
-        
-    } 
-    // Se for 'admin', ele DEVE especificar o ID do barbeiro que quer ver.
-    else if ($tipo_usuario_logado === 'admin') {
-        if (!isset($_GET['id_barbeiro']) || empty($_GET['id_barbeiro'])) {
-            throw new Exception('ID do profissional não fornecido (requerido para Admin).');
-        }
-        $id_barbeiro_alvo = (int)$_GET['id_barbeiro'];
-    }
-
-// 3. Se chegamos aqui, $id_barbeiro_alvo está 100% seguro.
-$stmt = $pdo->prepare(
-"SELECT dia_semana, hora_inicio, hora_fim, inicio_pausa, fim_pausa 
-FROM horarios_trabalho 
-WHERE id_barbeiro = :id_barbeiro"
- );
- $stmt->execute(['id_barbeiro' => $id_barbeiro_alvo]);
-
-    $response['horarios'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $response['sucesso'] = true;
+    echo json_encode($horarios);
 
 } catch (PDOException $e) {
-    $response['mensagem'] = 'Erro de banco de dados: ' . $e->getMessage();
-} catch (Exception $e) {
-$response['mensagem'] = $e->getMessage();
+    echo json_encode(['erro' => 'Erro de banco de dados: ' . $e->getMessage()]);
 }
-
-// 4. Resposta JSON unificada
-echo json_encode($response);
 ?>

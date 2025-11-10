@@ -18,6 +18,8 @@ if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_tipo'] !== 'admin' &&
 $usuarioLogadoId = $_SESSION['usuario_id'];
 $usuarioLogadoNome = $_SESSION['usuario_nome'];
 $usuarioLogadoTipo = $_SESSION['usuario_tipo']; // Pega o TIPO (admin ou barbeiro)
+
+$paginaAtiva = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
@@ -27,11 +29,15 @@ $usuarioLogadoTipo = $_SESSION['usuario_tipo']; // Pega o TIPO (admin ou barbeir
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ds Barber - Admin | Serviços</title>
     <!-- Shared Admin Styles -->
-    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/admin.css?v=<?php echo filemtime('../css/admin.css'); ?>"> 
     <!-- Page-specific Styles -->
     <link rel="stylesheet" href="../css/services.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="../manifest.json?v=<?php echo filemtime('../manifest.json'); ?>">
+    <link rel="apple-touch-icon" href="../logo-tela-inicial.png">
+    <link rel="icon" href="../favicon.ico?v=<?php echo filemtime('../favicon.ico'); ?>" type="image/x-icon">
 </head>
 <body>
     <div class="admin-panel">
@@ -45,17 +51,31 @@ $usuarioLogadoTipo = $_SESSION['usuario_tipo']; // Pega o TIPO (admin ou barbeir
             
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="admin.php" class="active"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
-                    <li><a href="services.php"><i class="fas fa-concierge-bell"></i> Serviços</a></li>
-                    <li><a href="barbers.php"><i class="fas fa-cut"></i> Barbeiros</a></li>
+                    <li><a href="admin.php" class="<?php echo ($paginaAtiva == 'admin.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-calendar-alt"></i> Agendamentos
+                    </a></li>
                     
-                    <li><a href="horarios.php"><i class="fas fa-clock"></i> Horários</a></li>
-
-                    <li><a href="reports.php"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                    <li><a href="services.php" class="<?php echo ($paginaAtiva == 'services.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-concierge-bell"></i> Serviços
+                    </a></li>
+                    
+                    <li><a href="horarios.php" class="<?php echo ($paginaAtiva == 'horarios.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-clock"></i> Horários
+                    </a></li>
+                    
+                    <li><a href="barbers.php" class="<?php echo ($paginaAtiva == 'barbers.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-cut"></i> Barbeiros
+                    </a></li>
+                
+                    <li><a href="reports.php" class="<?php echo ($paginaAtiva == 'reports.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-chart-line"></i> Relatórios
+                    </a></li>
                 </ul>
             </nav>
           <div class="user-info">
-                <img src="https://i.pravatar.cc/150?u=<?php echo htmlspecialchars($usuarioLogadoId); ?>" alt="User Avatar">
+                <div class="user-avatar-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
                 <div class="user-details">
                     <span class="user-name"><?php echo htmlspecialchars($usuarioLogadoNome); ?></span>
                 </div>

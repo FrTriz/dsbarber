@@ -146,11 +146,21 @@ body {
     border-radius: 8px;
 }
 
-.user-info img {
+.user-info .user-avatar-icon {
+    /* 1. Recria as dimensões da <img> original */
     width: 40px;
     height: 40px;
-    border-radius: 50%;
     margin-right: 12px;
+    
+    /* 2. Define o tamanho do ícone para preencher o espaço */
+    font-size: 40px; 
+    
+    /* 3. Define a cor */
+    color: var(--accent-green);
+    
+    /* 4. Alinhamento (para garantir o centro) */
+    line-height: 40px;
+    text-align: center;
 }
 
 .user-details {
@@ -545,7 +555,59 @@ body {
 }
 
 @media (max-width: 768px) {
+    .user-info{
+        margin-bottom: 15%;
+    }
     .header-actions { width: 100%; flex-wrap: wrap; justify-content: flex-start; }
     .day { min-height: 80px; }
     .appointment { font-size: 10px; }
+}
+
+/* --- (NOVO) Media Query para Telemóveis Pequenos --- */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 16px; /* Reduz o padding geral da página */
+    }
+    
+    .main-header {
+        padding-bottom: 10px;
+    }
+
+    .main-header h1 {
+        font-size: 20px; /* Diminui o título */
+    }
+    
+    .header-actions {
+        flex-direction: column; /* Empilha os botões do cabeçalho */
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .calendar-section {
+        padding: 10px; /* Reduz padding do calendário */
+    }
+
+    .weekday, .day {
+        padding: 4px 2px; /* Reduz muito o padding dos dias */
+        font-size: 0.75rem; /* Diminui a fonte */
+        min-height: 70px; /* Altura mínima menor */
+    }
+
+    .day-number {
+        font-size: 0.75rem;
+        top: 4px;
+        right: 4px;
+    }
+
+    .day .appointments {
+        margin-top: 18px; /* Sobe os agendamentos */
+    }
+
+    .appointment {
+        padding: 2px 3px;
+        font-size: 8px; /* Fonte muito pequena */
+        white-space: nowrap; /* Impede que o texto quebre a linha */
+    }
+
+ 
 }

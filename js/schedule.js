@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calendarDaysEl = document.getElementById('calendar-days');
     const timeSlotsContainer = document.getElementById('dynamic-slots-container');
     let currentDate = new Date();
-
+    let expirationTimer = null;
     // --- 3. FUNÇÕES PRINCIPAIS ---
 
     // (MODIFICADO) Busca os dias de trabalho do barbeiro
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
-            // (CORREÇÃO) Chama o NOVO script (buscar-dias-barbeiro.php)
+            //Chama o NOVO script (buscar-dias-barbeiro.php)
             const response = await fetch(`../php/Funcoes/buscar-dias-barbeiro.php?id_barbeiro=${barbeiroId}`);
             if (!response.ok) {
                 throw new Error(`Falha ao buscar dias: ${response.statusText}`);
@@ -134,30 +134,58 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.statusCheckInterval) {
             clearInterval(state.statusCheckInterval);
         }
-        state.statusCheckInterval = setInterval(async () => {
+
+        const executePoll = async () => {
+            // Se o intervalo foi limpo (ex: usuário voltou), não faça nada.
+            if (!state.statusCheckInterval) return; 
+
             try {
                 const statusResponse = await fetch(`../php/Funcoes/verificar-status.php?id_agendamento=${agendamentoId}`);
-                if (!statusResponse.ok) return; 
-                const statusData = await statusResponse.json();
-                if (statusData.status === 'confirmado') {
-                    clearInterval(state.statusCheckInterval); 
-                    state.statusCheckInterval = null;
-                    if(confirmationModal) confirmationModal.classList.add('show');
-                    if(pixLoading) pixLoading.style.display = 'none';
-                    if(pixContainer) pixContainer.style.display = 'none';
-                    if(document.querySelector('.tabs')) document.querySelector('.tabs').style.display = 'none';
-                    if(nextBtn) nextBtn.style.display = 'none'; 
-                    setTimeout(() => {
-                        window.location.href = 'meus-agendamentos.php';
-                    }, 4000);
+                
+                // Só processa se a resposta for OK
+                if (statusResponse.ok) {
+                    const statusData = await statusResponse.json();
+               
+                    if (statusData.status === 'confirmado') {
+                        // SUCESSO: Limpa o intervalo e mostra o modal
+                        clearInterval(state.statusCheckInterval); 
+                        state.statusCheckInterval = null;
+                        
+                        if (expirationTimer) {
+                        clearTimeout(expirationTimer);
+                        expirationTimer = null;
+                        }
+                        
+                        if(confirmationModal) confirmationModal.classList.add('show');
+                        if(pixLoading) pixLoading.style.display = 'none';
+                        if(pixContainer) pixContainer.style.display = 'none';
+                        if(document.querySelector('.tabs')) document.querySelector('.tabs').style.display = 'none';
+                        if(nextBtn) nextBtn.style.display = 'none'; 
+                        
+                        setTimeout(() => {
+                            window.location.href = 'meus-agendamentos.php';
+                        }, 4000);
+                    }
+                    // Se não for 'confirmado', não faz nada. O loop continua.
+                } else {
+                    // Servidor respondeu 404, 500, etc. Apenas loga, mas NÃO PARA o loop.
+                    console.warn(`Polling check falhou com status: ${statusResponse.status}`);
                 }
-            } catch (err) {
-                clearInterval(state.statusCheckInterval);
-                state.statusCheckInterval = null;
-            }
-        }, 5000);
-    }
 
+            } catch (err) {
+                // ERRO DE REDE (ex: throttling, internet caiu)
+                // APENAS LOGA O ERRO, MAS NÃO PARA O LOOP.
+                // A próxima tentativa do setInterval (em 5s) vai tentar de novo.
+                console.warn(`Polling check com erro de rede: ${err.message}`);
+                
+                // As linhas que dão 'clearInterval' foram REMOVIDAS daqui.
+            }
+        };
+
+        // Roda a primeira vez imediatamente, e depois a cada 5 segundos
+        executePoll(); 
+        state.statusCheckInterval = setInterval(executePoll, 5000);
+    }
 
     // --- 4. EVENT LISTENERS ---
 
@@ -206,7 +234,8 @@ document.addEventListener('DOMContentLoaded', () => {
         calendarDaysEl.innerHTML = '';
         const year = date.getFullYear();
         const month = date.getMonth();
-        monthNameEl.textContent = `${date.toLocaleString('pt-BR', { month: 'long' })} ${year}`;
+        const monthName = date.toLocaleString('pt-BR', { month: 'long' });
+        monthNameEl.textContent = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
         const firstDay = new Date(year, month, 1).getDay();
         const lastDate = new Date(year, month + 1, 0).getDate();
         for (let i = 0; i < firstDay; i++) {
@@ -222,10 +251,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateOfLoop = new Date(year, month, i); 
             const diaDaSemana = dateOfLoop.getDay(); // 0-6
             const fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            
+
+            if (dateOfLoop.getTime() === today.getTime()) {
+                dayEl.classList.add('today');
+            }
             let isEnabled = true;
 
-            // --- LÓGICA DE DESABILITAR CORRIGIDA ---
             // Regra 1: Desabilita dias passados
             if (dateOfLoop < today) {
                 isEnabled = false;
@@ -244,7 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     isEnabled = false;
                 }
             }
-            // --- FIM DA LÓGICA ---
             
             if (!isEnabled) {
                 dayEl.classList.add('disabled');
@@ -353,13 +383,36 @@ document.addEventListener('DOMContentLoaded', () => {
             nextBtn.textContent = 'Gerar PIX'; 
             if(pixContainer) pixContainer.style.display = 'none';
             if(pixLoading) pixLoading.style.display = 'none';
+            
+            // 1. Limpa todos os timers
+            if (expirationTimer) {
+                clearTimeout(expirationTimer);
+                expirationTimer = null;
+            }
             if (state.statusCheckInterval) {
                 clearInterval(state.statusCheckInterval);
                 state.statusCheckInterval = null;
             }
+
+            // 2. Verifica se um agendamento JÁ FOI CRIADO (e o usuário mudou de ideia)
+            if (state.idAgendamento) {
+                
+                // Sim, um PIX foi gerado. Vamos cancelar esse agendamento.
+                const formData = new FormData();
+                formData.append('id_agendamento', state.idAgendamento);
+
+                // Chama o script de cancelamento
+                fetch('../php/Funcoes/cancelar-agendamento-cliente.php', {
+                    method: 'POST',
+                    body: formData
+                }).catch(err => console.error('Falha ao cancelar agendamento anterior:', err));
+                
+                // Reseta o estado para permitir um novo agendamento
+                state.idAgendamento = null;
+            }
         });
     });
-
+    
    // --- Navigation ---
     nextBtn.addEventListener('click', async () => { 
         if (state.statusCheckInterval) return; 
@@ -379,62 +432,164 @@ document.addEventListener('DOMContentLoaded', () => {
             goToStep(state.currentStep + 1);
         
         } else if (state.currentStep === 4) {
+
+
             nextBtn.disabled = true; 
+
             nextBtn.textContent = 'Gerando...';
+
             if(pixLoading) pixLoading.style.display = 'block';
+
             if(pixContainer) pixContainer.style.display = 'none';
+
             try {
+
                 const response = await fetch('../php/Funcoes/criar-agendamento.php', {
+
                     method: 'POST',
+
                     headers: { 'Content-Type': 'application/json' },
+
                     body: JSON.stringify(state) 
+
                 });
+
                 if (!response.ok) throw new Error('Falha ao se comunicar com o servidor.');
+
                 const data = await response.json();
+
                 if (!data.sucesso) throw new Error(data.mensagem || 'Erro desconhecido no back-end.');
+
                 
+
                 state.idAgendamento = data.id_agendamento; 
+
                 
+
                 const dadosPagamento = {
+
                     id_pagamento: data.id_pagamento,
+
                     valor_a_pagar: data.valor_a_pagar
+
                 };
+
                 
+
                 const pixResponse = await fetch('../php/Funcoes/gerar-pix-mp.php', {
+
                     method: 'POST',
+
                     headers: { 'Content-Type': 'application/json' },
+
                     body: JSON.stringify(dadosPagamento)
+
                 });
+
                 
+
                 const pixData = await pixResponse.json();
+
                 if (!pixResponse.ok || !pixData.sucesso) {
+
                     throw new Error(pixData.mensagem || "Não foi possível gerar o PIX.");
+
                 }
 
+
+
                 if(pixLoading) pixLoading.style.display = 'none';
+
                 if(pixContainer) pixContainer.style.display = 'block';
+
                 if(qrCodeImg) qrCodeImg.src = "data:image/png;base64," + pixData.qr_code_base64;
+
                 if(copiaColaTexto) copiaColaTexto.textContent = pixData.qr_code_copy_paste;
+
                 if(btnCopiarPix) btnCopiarPix.onclick = () => {
+
                     navigator.clipboard.writeText(pixData.qr_code_copy_paste);
+
                     alert('Código PIX copiado!');
+
                 };
-                
+
+                // ---1: INICIAR O TIMER DE 30 MIN ---
+                if (expirationTimer) clearTimeout(expirationTimer);
+
+                expirationTimer = setTimeout(() => {
+                    // Se o timer estourar, mostra o modal de expiração
+                    document.getElementById('expiration-modal').classList.add('show');
+                    // Esconde o QR Code
+                    if(pixContainer) pixContainer.style.display = 'none';
+                    // Para o polling de verificação
+                    if (state.statusCheckInterval) {
+                        clearInterval(state.statusCheckInterval);
+                        state.statusCheckInterval = null;
+                    }
+                    // Faz o botão de recarregar a página funcionar
+                    document.getElementById('btn-reload-page').onclick = () => {
+                        location.reload();
+                    };
+                }, 1800000); // 30 minutos (30 * 60 * 1000)
+
                 startPolling(data.id_agendamento);
+
                 nextBtn.textContent = 'Aguardando Pagamento'; 
 
+
+
             } catch (error) {
+
                 console.error('Erro ao criar agendamento/pix:', error);
+
                 alert('Erro: ' + error.message);
+
                 nextBtn.disabled = false; 
+
                 nextBtn.textContent = 'Gerar PIX';
+
                 if(pixLoading) pixLoading.style.display = 'none';
+
             }
+
         }
     });
 
     backBtn.addEventListener('click', () => {
         if (state.currentStep > 1) {
+            
+            // 1. Limpa todos os timers, não importa o que aconteça
+            if (expirationTimer) {
+                clearTimeout(expirationTimer);
+                expirationTimer = null;
+            }
+            if (state.statusCheckInterval) {
+                clearInterval(state.statusCheckInterval);
+                state.statusCheckInterval = null;
+            }
+
+            // 2. Verifica se está voltando da ETAPA 4 e se um agendamento JÁ FOI CRIADO
+            if (state.currentStep === 4 && state.idAgendamento) {
+                
+                // Sim, um PIX foi gerado (state.idAgendamento existe). 
+                // Vamos cancelar esse agendamento silenciosamente em segundo plano.
+                
+                const formData = new FormData();
+                formData.append('id_agendamento', state.idAgendamento);
+
+                // Usamos o fetch() "fire-and-forget". Não precisamos esperar a resposta.
+                // Isso chama o mesmo script que o botão "Cancelar" usa.
+                fetch('../php/Funcoes/cancelar-agendamento-cliente.php', {
+                    method: 'POST',
+                    body: formData
+                }).catch(err => console.error('Falha ao cancelar agendamento anterior:', err));
+                
+                // Reseta o estado para permitir um novo agendamento
+                state.idAgendamento = null;
+            }
+
+            // 3. Finalmente, volta para a etapa anterior
             goToStep(state.currentStep - 1);
         }
     });

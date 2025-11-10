@@ -15,11 +15,15 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ds Barber - Meus Agendamentos</title>
     
-    <link rel="stylesheet" href="../css/style.css"> 
-    <link rel="stylesheet" href="../css/meus-agendamentos.css">
+    <link rel="stylesheet" href="../css/style.css?v=<?php echo filemtime('../css/style.css'); ?>"> 
+    <link rel="stylesheet" href="../css/meus-agendamentos.css?v=<?php echo filemtime('../css/meus-agendamentos.css'); ?>">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="../manifest.json?v=<?php echo filemtime('../manifest.json'); ?>">
+    <link rel="apple-touch-icon" href="../logo-tela-inicial.png">
+    <link rel="icon" href="../favicon.ico?v=<?php echo filemtime('../favicon.ico'); ?>" type="image/x-icon">
 </head>
 <body>
     <header>
@@ -56,6 +60,16 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') 
             </header>
             
             <div class="pix-info">
+                
+                <div id="payment-choice-modal" style="display: none;">
+                    <h4>Escolha uma opção de pagamento</h4>
+                    <div class="tabs">
+                        <button class="tab-btn active" data-pay-option="half">Pagar Metade<br>R$<span id="payment-total-half-modal">0.00</span></button>
+                        <button class="tab-btn" data-pay-option="full">Pagamento Total<br>R$<span id="payment-total-full-modal">0.00</span></button>
+                    </div>
+                    <button id="btn-gerar-pix-modal" class="btn-pagar" style="width:100%; margin-top: 15px; box-sizing: border-box;">Gerar PIX</button>
+                </div>
+                
                 <div id="pix-loading-modal" style="text-align: center; padding: 40px 0;">
                     <p class="loading">Gerando seu PIX, aguarde...</p>
                 </div>
@@ -74,6 +88,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') 
         </div>
     </div>
 
-    <script src="../js/meus-agendamentos.js"></script>
+    <script src="../js/meus-agendamentos.js?v=<?php echo filemtime('../js/meus-agendamentos.js'); ?>"></script>
 </body>
 </html>

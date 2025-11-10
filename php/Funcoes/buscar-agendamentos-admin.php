@@ -49,8 +49,12 @@ try {
         $params[':id_barbeiro_filtro'] = (int)$filterBarberId;
     }
 
-    // Adicionar filtro de Status (se não for 'all')
-    if ($filterStatus !== 'all') {
+    // Adicionar filtro de Status
+    if ($filterStatus === 'all') {
+        // "Todos" agora significa "Todos, exceto cancelados"
+        $conditions[] = "status_agendamento != 'cancelado'";
+    } else {
+        // Se um status específico for pedido (ex: 'cancelado'), ele funciona
         $conditions[] = "status_agendamento = :status_filtro";
         $params[':status_filtro'] = $filterStatus;
     }

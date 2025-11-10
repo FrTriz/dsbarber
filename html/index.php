@@ -7,13 +7,16 @@ require_once '../php/session-manager.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ds Barber</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css?v=<?php echo filemtime('../css/style.css'); ?>"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     
-    <link rel="manifest" href="../manifest.json">
+    
+    <link rel="manifest" href="../manifest.json?v=<?php echo filemtime('../manifest.json'); ?>">
+    <link rel="apple-touch-icon" href="../logo-tela-inicial.png">
+    <link rel="icon" href="../favicon.ico?v=<?php echo filemtime('../favicon.ico'); ?>" type="image/x-icon">
+    
 
-    <link rel="apple-touch-icon" href="../Ds_Barber_Logo.png">
 </head>
 <body>
     <header>
@@ -24,6 +27,7 @@ require_once '../php/session-manager.php';
                     <span class="welcome-message">
                         Olá, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!
                     </span>
+                    <a href="../html/admin.php" class="btn-meus-agendamentos">Painel Admin</a>
                     <a href="../html/meus-agendamentos.php" class="btn-meus-agendamentos">Meus Agendamentos</a>
                     <a href="../php/Funcoes/logout-login.php" class="btn-logout">Sair</a>
 
@@ -101,7 +105,7 @@ require_once '../php/session-manager.php';
 
         <section class="location" id="location">
             <h2>Nossa Localização</h2>
-            <p>Venha nos visitar no coração de Lisboa.</p>
+            <p>Venha nos visitar!</p>
             <div class="map">
                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3908.8532221848154!2d-39.28341150197513!3d-11.562378092698328!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7139d03db49c939%3A0xc23e4f8cb7cd365!2sR.%20Duque%20de%20Caxias%2C%2061%20-%20Centro%2C%20Concei%C3%A7%C3%A3o%20do%20Coit%C3%A9%20-%20BA%2C%2048730-000%2C%20Brazil!5e0!3m2!1sen!2spt!4v1761444239822!5m2!1sen!2spt" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
@@ -114,9 +118,9 @@ require_once '../php/session-manager.php';
                 <a href="#" class="logo"><img src="../Ds_Barber_Logo.png" width="85px" height="80px"></a>
                 <p>Estilo e precisão em cada corte. A sua barbearia moderna.</p>
                 <div class="social-icons">
-                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.instagram.com/dsbarber_oficial?igsh=dmFhNHJ1azJsZTh3"><i class="fab fa-instagram"></i></a>
                     <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>
             <div class="footer-section">
@@ -146,7 +150,7 @@ require_once '../php/session-manager.php';
             </div>
         </div>
         <div class="footer-bottom">
-            <p>© 2024 Ds Barber. Todos os direitos reservados.</p>
+            <p>© 2025 Ds Barber. Todos os direitos reservados.</p>
         </div>
     </footer>
 

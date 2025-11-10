@@ -26,13 +26,17 @@ $listaBarbeiros = $usuarioObj->listarPorTipo('barbeiro'); // <-- ADICIONADO
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ds Barber - Agendamento</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css?v=<?php echo filemtime('../css/style.css'); ?>"> 
     
     <link rel="stylesheet" href="../css/schedule.css?v=<?php echo filemtime('../css/schedule.css'); ?>">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="../manifest.json?v=<?php echo filemtime('../manifest.json'); ?>">
+    <link rel="apple-touch-icon" href="../logo-tela-inicial.png">
+    <link rel="icon" href="../favicon.ico?v=<?php echo filemtime('../favicon.ico'); ?>" type="image/x-icon">
 </head>
 <body>
     <main class="schedule-container">
@@ -127,44 +131,88 @@ $listaBarbeiros = $usuarioObj->listarPorTipo('barbeiro'); // <-- ADICIONADO
                     </div>
                 </div>
 
-                 <div class="step-content" id="step-4">
+              <div class="step-content" id="step-4">
+
                     <h2>Complete seu Pagamento</h2>
+
                     <div class="payment-container">
+
                         <div class="payment-options">
+
                             <h4>Escolha uma opção de pagamento</h4>
+
                             <div class="tabs">
+
                                 <button class="tab-btn active">Pagamento Total<br>R$<span id="payment-total-full">50.00</span></button>
+
                                 <button class="tab-btn">Pagar Metade<br>R$<span id="payment-total-half">25.00</span></button>
+
                             </div>
+
                             
+
                             <div class="pix-info">
+
                                 <div id="pix-loading" style="text-align: center; padding: 40px 0; display: none;">
+
                                     <p class="loading">Gerando seu PIX, aguarde...</p>
+
                                 </div>
 
+
+
                                 <div id="pix-container" style="display: none;">
+
                                     <p class="pix-instructions">Escaneie o QR code com o aplicativo do seu banco ou copie o código abaixo para completar o pagamento.</p>
+                                    
+                                    <div class="pix-expiration-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span>Você deve efetuar o pagamento em <strong>30 minutos</strong>, ou seu agendamento será cancelado automaticamente.</span>
+                                    </div>
+                                    
                                     <div class="pix-details">
+
                                         <img src="" alt="QR Code PIX" id="pix-qr-code-img">
+
                                         <div class="instructions">
+
                                             <p><strong>Instruções de Pagamento</strong></p>
+
                                             <ol>
+
                                                 <li>Abra o aplicativo do seu banco e selecione a opção PIX.</li>
+
                                                 <li>Escaneie o QR Code ou use a opção PIX Copia & Cola.</li>
+
                                                 <li>Confirme os detalhes e complete o pagamento.</li>
+
                                                 <li>Seu agendamento será confirmado automaticamente.</li>
+
                                             </ol>
+
                                         </div>
+
                                     </div>
+
                                     <div class="pix-code">
+
                                         <span id="pix-copia-cola-texto"></span>
+
                                         <button type="button" id="btn-copiar-pix">Copiar Código</button>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                             </div>
+
                     </div>
+
                 </div>
+
+
 
             </div>
 
@@ -187,9 +235,9 @@ $listaBarbeiros = $usuarioObj->listarPorTipo('barbeiro'); // <-- ADICIONADO
                     <span>Preço Total:</span>
                     <strong id="summary-total">R$0.00</strong>
                 </div>
-
                 </aside>
         </div>
+        
 
         <div class="navigation-buttons">
             <button id="back-btn" class="secondary-btn" disabled>Voltar</button>
@@ -207,6 +255,21 @@ $listaBarbeiros = $usuarioObj->listarPorTipo('barbeiro'); // <-- ADICIONADO
                 <i class="fas fa-check-circle"></i>
                 <p>Seu agendamento foi confirmado com sucesso.</p>
                 <p>Você será redirecionado para "Meus Agendamentos"...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="expiration-modal" class="modal-pix">
+        <div class="modal-pix-content">
+            <header class="modal-pix-header">
+                <h2>Tempo Esgotado</h2>
+            </header>
+            
+            <div class="modal-body">
+                <i class="fas fa-times-circle icon-expired"></i>
+                <p>O tempo para pagamento (30 minutos) expirou.</p>
+                <p>Seu agendamento foi cancelado para liberar o horário. Por favor, tente novamente.</p>
+                <button id="btn-reload-page" class="primary-btn" style="width: 100%; margin-top: 15px;">Novo Agendamento</button>
             </div>
         </div>
     </div>

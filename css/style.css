@@ -17,8 +17,6 @@ body {
     background-color: var(--bg-dark-green);
     color: var(--text-light);
     overflow-x: hidden;
-    /* Adiciona padding-top para o header fixo */
-    padding-top: 90px; 
 }
 
 a {
@@ -41,7 +39,7 @@ a {
 
 /* Header (Fixo e Responsivo) */
 header {
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     width: 100%;
@@ -61,7 +59,6 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
     max-width: 1200px; /* Limita largura */
     margin: 0 auto; /* Centraliza */
     padding: 10px 20px; /* Padding interno */
@@ -318,7 +315,7 @@ footer {
 .footer-section {
     flex: 1;
     min-width: 200px;
-    margin: 20px;
+    margin: 20px auto;
 }
 .footer-section h3 {
     font-size: 18px;
@@ -463,6 +460,8 @@ label {
 @media (max-width: 768px) {
     .logo {
         font-size: 20px;
+        display: flex;
+        justify-content: center;
     }
 
     /* Regras do Header Responsivo */
@@ -477,9 +476,6 @@ label {
         gap: 10px;
     }
     
-    body {
-        padding-top: 150px; 
-    }
     .container {
         margin-top: -150px;
     }
@@ -491,7 +487,7 @@ label {
 
     /* Regras do Corpo da Index */
     .hero-container {
-        padding: 20px; 
+        padding: 30px 20px 0px 20px;
     }
     .hero h1 {
         font-size: 36px;

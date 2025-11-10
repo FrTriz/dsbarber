@@ -1,6 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
     const listaAgendamentosContainer = document.getElementById('lista-agendamentos');
 
+    // --- (NOVO) LÓGICA DO MODAL DE PAGAMENTO ---
+    const pixModal = document.getElementById('pix-modal');
+    const closePixModalBtn = document.getElementById('close-pix-modal-btn');
+    
+    // Seletores dos 3 estados do modal
+    const paymentChoiceModal = document.getElementById('payment-choice-modal');
+    const pixLoadingModal = document.getElementById('pix-loading-modal');
+    const pixContainerModal = document.getElementById('pix-container-modal');
+    
+    // Seletores dos botões de escolha
+    const paymentTotalHalfModal = document.getElementById('payment-total-half-modal');
+    const paymentTotalFullModal = document.getElementById('payment-total-full-modal');
+    const modalTabs = pixModal.querySelectorAll('.tab-btn');
+    const btnGerarPixModal = document.getElementById('btn-gerar-pix-modal');
+
+    // Seletores do PIX
+    const qrCodeImgModal = document.getElementById('pix-qr-code-img-modal');
+    const copiaColaTextoModal = document.getElementById('pix-copia-cola-texto-modal');
+    const btnCopiarPixModal = document.getElementById('btn-copiar-pix-modal');
+
+    // (NOVO) Armazena os dados do agendamento que está sendo pago
+    let modalState = {
+        idPagamento: null,
+        valorPendente: 0,
+        valorTotal: 0,
+        paymentOption: 'half' // Começa selecionando 'metade'
+    };
+
     /**
      * Traduz o status do banco (PT) para a classe CSS (EN)
      */
@@ -28,31 +56,31 @@ document.addEventListener('DOMContentLoaded', () => {
     function criarCardAgendamento(apt) {
         const card = document.createElement('div');
         card.className = 'agendamento-card';
-        card.id = `agendamento-${apt.id_agendamento}`; // ID único para o card
+        card.id = `agendamento-${apt.id_agendamento}`; 
 
         // 1. Formatar dados
         const statusClasse = traduzirStatusParaClasse(apt.status_agendamento);
         const statusTexto = apt.status_agendamento.charAt(0).toUpperCase() + apt.status_agendamento.slice(1);
         
-        // USA O valor_a_pagar (que pode ser metade)
-        const precoFormatado = parseFloat(apt.valor_a_pagar).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        // (CORREÇÃO) Usa 'valor_pendente' vindo do PHP
+        const precoFormatado = parseFloat(apt.valor_pendente).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         // 2. Lógica de Ação (Botões) - MODIFICADO
         let acaoButtonsHtml = '';
         if (statusClasse === 'pending') {
-            // Adiciona data-attributes ao botão Pagar
+            // (CORREÇÃO) Adiciona 'data-valor-total' e 'data-valor-pendente'
             acaoButtonsHtml = `
                 <div class="acao-buttons">
                     <a href="#" class="btn-pagar" 
                        data-id-pagamento="${apt.id_pagamento}" 
-                       data-valor="${apt.valor_a_pagar}">
+                       data-valor-pendente="${apt.valor_pendente}"
+                       data-valor-total="${apt.valor_total}">
                        Pagar Agora
                     </a>
                     <button class="btn-cancelar" data-id="${apt.id_agendamento}">Cancelar</button>
                 </div>
             `;
         } else {
-            // Deixa o espaço vazio para manter o alinhamento
             acaoButtonsHtml = '<div class="acao-buttons">&nbsp;</div>';
         }
 
@@ -86,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * Busca os agendamentos no back-end
      */
     async function carregarAgendamentos() {
+        // ... (Esta função continua igual à que você já tinha)
         if (!listaAgendamentosContainer) return;
         
         listaAgendamentosContainer.innerHTML = '<p class="loading-message">Carregando seus agendamentos...</p>';
@@ -97,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!data.sucesso) throw new Error(data.mensagem || 'Erro ao buscar dados.');
 
-            listaAgendamentosContainer.innerHTML = ''; // Limpa o "carregando"
+            listaAgendamentosContainer.innerHTML = ''; 
 
             if (data.agendamentos.length === 0) {
                 listaAgendamentosContainer.innerHTML = '<p class="loading-message">Você ainda não possui agendamentos.</p>';
@@ -119,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * Lida com o clique no botão de cancelar
      */
     async function handleCancelamento(idAgendamento, buttonElement) {
-        // Pede confirmação ao usuário
+        // ... (Esta função continua igual à que você já tinha)
         if (!confirm("Tem certeza que deseja cancelar este agendamento?")) {
             return;
         }
@@ -131,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData();
             formData.append('id_agendamento', idAgendamento);
 
-            // USA O SCRIPT DE CANCELAMENTO QUE VOCÊ JÁ TINHA
             const response = await fetch('../php/Funcoes/cancelar-agendamento-cliente.php', {
                 method: 'POST',
                 body: formData
@@ -142,24 +170,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!data.sucesso) {
                 throw new Error(data.mensagem || 'Erro desconhecido no servidor.');
             }
-
-            // Sucesso! Atualizar a UI do card
+            
             const card = document.getElementById(`agendamento-${idAgendamento}`);
             if (card) {
                 const badge = card.querySelector('.status-badge');
                 const acaoContainer = card.querySelector('.acao-buttons');
 
-                // Atualiza o badge
                 badge.textContent = 'Cancelado';
                 badge.className = 'status-badge canceled';
 
-                // Remove os botões
                 if (acaoContainer) {
                     acaoContainer.innerHTML = '&nbsp;';
                 }
             }
             
-            alert(data.mensagem); // Mostra "Agendamento cancelado com sucesso!"
+            alert(data.mensagem);
 
         } catch (error) {
             console.error('Erro ao cancelar:', error);
@@ -169,43 +194,75 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- (NOVO) LÓGICA DO MODAL DE PAGAMENTO ---
-    const pixModal = document.getElementById('pix-modal');
-    const closePixModalBtn = document.getElementById('close-pix-modal-btn');
-    const pixLoadingModal = document.getElementById('pix-loading-modal');
-    const pixContainerModal = document.getElementById('pix-container-modal');
-    const qrCodeImgModal = document.getElementById('pix-qr-code-img-modal');
-    const copiaColaTextoModal = document.getElementById('pix-copia-cola-texto-modal');
-    const btnCopiarPixModal = document.getElementById('btn-copiar-pix-modal');
 
-    const openPixModal = () => {
-        // Reseta o modal para o estado "carregando"
-        pixLoadingModal.style.display = 'block';
-        pixContainerModal.style.display = 'none';
-        pixLoadingModal.innerHTML = '<p class="loading">Gerando seu PIX, aguarde...</p>'; // Garante que não mostre erro
-        pixModal.classList.add('show');
-    };
+    // --- (MODIFICADO) LÓGICA DO MODAL ---
+
+    // Abre a "caixa" do modal
+    const openPixModal = () => pixModal.classList.add('show');
+    
+    // Fecha a "caixa" do modal
     const closePixModal = () => pixModal.classList.remove('show');
+    
+    // (NOVO) Mostra a tela de escolha de pagamento
+    function showPaymentChoice(idPagamento, valorPendente, valorTotal) {
+        // 1. Armazena os dados no estado do modal
+        modalState.idPagamento = idPagamento;
+        modalState.valorPendente = parseFloat(valorPendente);
+        modalState.valorTotal = parseFloat(valorTotal);
 
-    // Fechar o modal
-    if(closePixModalBtn) closePixModalBtn.addEventListener('click', closePixModal);
-    if(pixModal) pixModal.addEventListener('click', (e) => {
-        if (e.target === pixModal) closePixModal();
-    });
+        // 2. Atualiza os textos dos botões
+        paymentTotalHalfModal.textContent = modalState.valorPendente.toFixed(2);
+        paymentTotalFullModal.textContent = modalState.valorTotal.toFixed(2);
 
-    /**
-     * (NOVO) Chama o gerar-pix-mp.php e preenche o modal
-     */
-    async function handleGerarPix(idPagamento, valorPagar) {
+        // 3. === A NOVA LÓGICA ESTÁ AQUI ===
+        // Verifica se a escolha original foi 'metade'
+        const escolheuMetade = modalState.valorPendente < modalState.valorTotal;
+
+        if (escolheuMetade) {
+            modalState.paymentOption = 'half';
+        } else {
+            modalState.paymentOption = 'full';
+        }
+
+        // 4. Reseta os tabs (deixa o correto como 'ativo')
+        modalTabs.forEach(tab => {
+            const option = tab.dataset.payOption; // 'half' ou 'full'
+            if (option === modalState.paymentOption) {
+                tab.classList.add('active'); // Ativa o default
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+        // === FIM DA NOVA LÓGICA ===
+
+        // 5. Controla a visibilidade (mostra escolha, esconde os outros)
+        paymentChoiceModal.style.display = 'block';
+        pixLoadingModal.style.display = 'none';
+        pixContainerModal.style.display = 'none';
+
+        // 6. Abre o modal
         openPixModal();
+    }
+
+    // (NOVO) Função que gera o PIX (antiga handleGerarPix)
+    async function executePixGeneration() {
+        // 1. Mostra o loading e esconde a escolha
+        paymentChoiceModal.style.display = 'none';
+        pixLoadingModal.style.display = 'block';
+        pixLoadingModal.innerHTML = '<p class="loading">Gerando seu PIX, aguarde...</p>';
+
+        // 2. Decide o valor final baseado na escolha
+        const valorFinal = modalState.paymentOption === 'full' 
+            ? modalState.valorTotal 
+            : modalState.valorPendente;
 
         try {
             const dadosPagamento = {
-                id_pagamento: idPagamento,
-                valor_a_pagar: parseFloat(valorPagar)
+                id_pagamento: modalState.idPagamento,
+                valor_a_pagar: valorFinal
             };
 
-            // USA O MESMO SCRIPT 'gerar-pix-mp.php' DA PÁGINA DE AGENDAMENTO
+            // 3. Chama o back-end para gerar o PIX
             const response = await fetch('../php/Funcoes/gerar-pix-mp.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -217,35 +274,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(pixData.mensagem || "Não foi possível gerar o PIX.");
             }
 
-            // SUCESSO! Exibe o PIX
+            // 4. SUCESSO! Exibe o PIX
             qrCodeImgModal.src = "data:image/png;base64," + pixData.qr_code_base64;
             copiaColaTextoModal.textContent = pixData.qr_code_copy_paste;
             
-            btnCopiarPixModal.onclick = () => { // Adiciona evento ao botão copiar
+            btnCopiarPixModal.onclick = () => {
                 navigator.clipboard.writeText(pixData.qr_code_copy_paste);
                 alert('Código PIX copiado!');
             };
 
-            // Troca a view de "Carregando" para "PIX"
+            // 5. Troca a view de "Carregando" para "PIX"
             pixLoadingModal.style.display = 'none';
             pixContainerModal.style.display = 'block';
 
         } catch (error) {
             console.error('Erro ao gerar PIX:', error);
             pixLoadingModal.innerHTML = `<p class="error-message">Falha ao gerar PIX: ${error.message}</p>`;
+            // (Opcional) Voltar para a tela de escolha
+            // paymentChoiceModal.style.display = 'block'; 
         }
     }
 
-    // Listener de eventos (modificado para incluir o .btn-pagar)
+    // --- (MODIFICADO) Listeners de Eventos ---
+
+    // Fechar o modal
+    if(closePixModalBtn) closePixModalBtn.addEventListener('click', closePixModal);
+    if(pixModal) pixModal.addEventListener('click', (e) => {
+        if (e.target === pixModal) closePixModal();
+    });
+
+    // (NOVO) Listener para os tabs (Metade/Total) dentro do modal
+    modalTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            modalTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            modalState.paymentOption = tab.dataset.payOption; // 'half' ou 'full'
+        });
+    });
+
+    // (NOVO) Listener para o botão "Gerar PIX" de dentro do modal
+    if (btnGerarPixModal) {
+        btnGerarPixModal.addEventListener('click', executePixGeneration);
+    }
+
+    // (MODIFICADO) Listener de eventos principal (Cards)
     listaAgendamentosContainer.addEventListener('click', (e) => {
         const payButton = e.target.closest('.btn-pagar');
         const cancelButton = e.target.closest('.btn-cancelar');
 
         if (payButton) {
             e.preventDefault();
+            // Pega os dados do botão
             const idPagamento = payButton.dataset.idPagamento;
-            const valor = payButton.dataset.valor;
-            handleGerarPix(idPagamento, valor); // Chama a nova função
+            const valorPendente = payButton.dataset.valorPendente;
+            const valorTotal = payButton.dataset.valorTotal;
+            
+            // (MUDOU) Em vez de gerar o PIX, mostra a tela de escolha
+            showPaymentChoice(idPagamento, valorPendente, valorTotal);
         }
         
         if (cancelButton) {

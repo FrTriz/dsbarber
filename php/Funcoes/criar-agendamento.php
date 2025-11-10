@@ -1,15 +1,6 @@
 <?php
 
-require_once '../session-manager.php';
-if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') {
-
-    // Se for uma página HTML, redirecione
-    // header('Location: ../html/login.php');
-    
-    // Se for uma API (retorna JSON)
-    echo json_encode(['sucesso' => false, 'mensagem' => 'Acesso restrito a clientes.']);
-    exit();
-} 
+require_once '../session-manager.php'; 
 
 header('Content-Type: application/json');
 

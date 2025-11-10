@@ -2,21 +2,16 @@
 header('Content-Type: application/json');
 
 require_once '../session-manager.php';
-// 1. (Passo 2.2) Controle de Acesso
-if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') {
-    echo json_encode(['sucesso' => false, 'mensagem' => 'Acesso restrito a clientes.']);
-    exit();
-}
-require_once '../conexao.php'; 
-// A linha abaixo carrega o autoload, essencial para o MercadoPago\SDK
+require_once '../conexao.php';
+// 1. Inclui o SDK do Mercado Pago (instalado via Composer)
 require_once '../../vendor/autoload.php'; 
 
 $response = ['sucesso' => false];
-$id_cliente = $_SESSION['usuario_id']; // Pega o cliente logado
 
 try {
-    // 2. Configura o Access Token do .env
-    $accessToken = $_ENV['MP_ACCESS_TOKEN']; 
+    // 2. PEGUE SEU ACCESS TOKEN NO PAINEL DO MERCADO PAGO
+    // (TEST-...) para testes, (APP_USR-...) para produção
+    $accessToken = "xxxxxxxxxxxxxxxxxxx"; 
     MercadoPago\SDK::setAccessToken($accessToken);
 
     // 3. Pega os dados que o 'schedule.js' vai enviar
@@ -30,48 +25,30 @@ try {
     $id_pagamento_interno = $data['id_pagamento'];
     $valor_a_pagar = (float)$data['valor_a_pagar'];
     
-    // -----------------------------------------------------------------
-    // 3.5 (Passo 3) VERIFICAÇÃO DE POSSE (PROTEÇÃO CONTRA IDOR)
-    // -----------------------------------------------------------------
-    // Antes de prosseguir, verificamos se o pagamento pertence ao cliente
-    // logado e se o status do pagamento ainda está 'pendente'.
-    
-    $stmt_check = $pdo->prepare(
-        "SELECT 1 FROM pagamento p
-         JOIN agendamento a ON p.id_agendamento = a.id_agendamento
-         WHERE p.id_pagamento = :id_pagamento
-           AND a.id_cliente = :id_cliente
-           AND p.status = 'pendente'"
-    );
-
-    $stmt_check->execute([
-        ':id_pagamento' => $id_pagamento_interno,
-        ':id_cliente'   => $id_cliente
-    ]);
-
-    // Se fetch() retornar false, o pagamento não existe, não é do cliente,
-    // ou não está mais pendente.
-    if ($stmt_check->fetch() === false) {
-        throw new Exception("Pagamento não encontrado, não autorizado ou já processado.");
-    }
-
-    // 4. (SEGURO) Buscar dados do cliente da sessão
-    // Só executamos isso se a verificação acima passar
+    // (Opcional, mas recomendado) Buscar e-mail e nome do cliente da sessão
+    $id_cliente = $_SESSION['usuario_id'];
     $stmt_cliente = $pdo->prepare("SELECT nome, email FROM usuarios WHERE id_usuario = ?");
     $stmt_cliente->execute([$id_cliente]);
     $cliente = $stmt_cliente->fetch(PDO::FETCH_ASSOC);
     $nome_cliente_parts = explode(' ', $cliente['nome'], 2);
 
-    // 5. Cria o objeto de pagamento
+    // 4. Cria o objeto de pagamento
     $payment = new MercadoPago\Payment();
     $payment->transaction_amount = $valor_a_pagar;
     $payment->description = "Agendamento DsBarber - Pedido #" . $id_pagamento_interno;
     $payment->payment_method_id = "pix";
     
-    // 6. Vincula o ID do MP com o seu banco de dados
+    // Define a expiração do PIX para 30 minutos a partir de agora
+    // (Usando o fuso horário de São Paulo para garantir consistência)
+    $expiration_date = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+    $expiration_date->add(new DateInterval('PT30M')); // PT30M = Período de Tempo 30 Minutos
+    $payment->date_of_expiration = $expiration_date->format('Y-m-d\TH:i:s.vP');
+    
+    // 5. ESSENCIAL: Vincula o ID do MP com o seu banco de dados
     $payment->external_reference = $id_pagamento_interno; 
     
-    // 7. URL do Webhook
+    // 6. URL para onde o MP vai te avisar quando o PIX for pago
+    // (Você precisará criar este arquivo 'webhook-mp.php' depois)
     $payment->notification_url = "https://beige-sandpiper-991885.hostingersite.com/php/Funcoes/webhook-mp.php";
 
     $payment->payer = [
@@ -80,10 +57,24 @@ try {
         "last_name" => $nome_cliente_parts[1] ?? 'Cliente'
     ];
 
-    // 8. Salva o pagamento (envia para a API do MP)
+    // 7. Salva o pagamento (envia para a API do MP)
     $payment->save();
+    
+    // --- (NOVA ADIÇÃO) ---
+    // Salva o ID do Mercado Pago (ex: 132861775932) no nosso banco
+    if ($payment->id) {
+        $stmt_save_mp_id = $pdo->prepare(
+            "UPDATE pagamento SET mp_payment_id = :mp_id 
+             WHERE id_pagamento = :id_pagamento_interno"
+        );
+        $stmt_save_mp_id->execute([
+            ':mp_id' => $payment->id,
+            ':id_pagamento_interno' => $id_pagamento_interno
+        ]);
+    }
+    // --- (FIM DA ADIÇÃO) ---
 
-    // 9. Se deu tudo certo, retorna os dados do PIX para o JavaScript
+    // 8. Se deu tudo certo, retorna os dados do PIX para o JavaScript
     if ($payment->id) {
         $response['sucesso'] = true;
         $response['qr_code_base64'] = $payment->point_of_interaction->transaction_data->qr_code_base64;

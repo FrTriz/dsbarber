@@ -2,8 +2,7 @@
 
 .container-meus-agendamentos {
     max-width: 900px;
-    /* Remove a margem superior para funcionar com o padding-top do body */
-    margin: 40px auto; 
+    margin: 5px auto; 
     padding: 20px;
 }
 
@@ -13,6 +12,7 @@
     border-bottom: 2px solid var(--accent-green);
     padding-bottom: 10px;
     margin-bottom: 40px;
+    margin-top: 0px;
 }
 
 /* Container para os cards */
@@ -194,9 +194,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    border-radius: 10px;
 }
 .modal-pix-header h2 {
     margin: 0;
+    margin-left: 10px;
 }
 .close-pix-modal-btn {
     background: none;
@@ -251,13 +253,14 @@
 /* --- Media Query para o corpo de "Meus Agendamentos" --- */
 @media (max-width: 600px) {
     .container-meus-agendamentos {
-        margin-top: 20px;
+        margin: 5px auto;
         padding: 10px;
     }
     
     .container-meus-agendamentos h1 {
         font-size: 2rem;
         margin-bottom: 20px;
+        margin-top: 15px;
     }
 
     .agendamento-card {
@@ -283,6 +286,30 @@
         width: 100%; 
         max-width: 250px; /* Limite */
     }
+}
+
+/* --- Estilos dos Tabs (Copiado de schedule.css) --- */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    background: none;
+    border: 2px solid var(--text-dark);
+    color: var(--text-light);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.tab-btn.active {
+    border-color: var(--accent-green);
+    background-color: rgba(46, 182, 125, 0.1);
 }
 
 /* --- (NOVO) Media Query para Telas Pequenas --- */

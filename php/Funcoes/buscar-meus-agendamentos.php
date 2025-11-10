@@ -14,15 +14,21 @@ try {
     
     $id_cliente = $_SESSION['usuario_id'];
 
-    // 2. Montar a Query SQL (MODIFICADA para buscar dados do pagamento)
-    //    (Usamos joins explícitos para garantir que pegamos os dados do pagamento)
+   // 2. Montar a Query SQL (CORRIGIDA)
+    // (Calcula o valor_total real somando os serviços, ignorando o valor da view)
     $sql = "SELECT 
                 a.id_agendamento, 
                 DATE_FORMAT(a.data_hora_inicio, '%d/%m/%Y') as data_fmt, 
                 DATE_FORMAT(a.data_hora_inicio, '%H:%i') as hora_fmt, 
                 vw.servicos_agendados, 
                 a.status as status_agendamento,
-                p.valor as valor_a_pagar,
+                p.valor as valor_pendente,
+                (
+                    SELECT SUM(s.preco) 
+                    FROM agendamento_servicos asoc 
+                    JOIN servicos s ON asoc.id_servico = s.id_servico
+                    WHERE asoc.id_agendamento = a.id_agendamento
+                ) as valor_total,
                 p.id_pagamento
             FROM 
                 agendamento a
@@ -32,7 +38,8 @@ try {
                 pagamento p ON a.id_agendamento = p.id_agendamento
             WHERE 
                 a.id_cliente = :id_cliente
-            ORDER BY 
+                AND a.status != 'cancelado' 
+            ORDER BY
                 a.data_hora_inicio DESC"; // Mais recentes primeiro
     
     // 3. Executar e retornar

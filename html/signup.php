@@ -6,6 +6,10 @@
     <title>Ds Barber - Cadastro</title>
     <link rel="stylesheet" href="../css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="../manifest.json?v=<?php echo filemtime('../manifest.json'); ?>">
+    <link rel="apple-touch-icon" href="../logo-tela-inicial.png">
+    <link rel="icon" href="../favicon.ico?v=<?php echo filemtime('../favicon.ico'); ?>" type="image/x-icon">
 </head>
 <body>
     <div class="container">

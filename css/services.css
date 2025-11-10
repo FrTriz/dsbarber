@@ -13,12 +13,15 @@
     gap: 8px;
 }
 
+
 .services-cards-section {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    /* (CORRIGIDO) A largura mínima foi reduzida de 350px para 300px */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
 }
+
 
 .service-card {
     background-color: #1F2924;
